@@ -40,6 +40,56 @@ GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable = {
 	["OutSine"] 		= math.ease.OutSine
 };
 
+-- Used to parse strings.
+function GLOBALS_3D_PARTICLE_EDITOR:ToGeneric(data)
+	return "\"" .. data .. "\"";
+end
+
+-- Used to parse integers and floats.
+function GLOBALS_3D_PARTICLE_EDITOR:ToNumber(data)
+	return data;
+end
+
+-- Used to parse angles.
+function GLOBALS_3D_PARTICLE_EDITOR:ToAngle(data)
+	return "\"{" .. data.p .. " " .. data.y .. " " .. data.r .. "}\"";
+end
+
+-- Used to parse vectors.
+function GLOBALS_3D_PARTICLE_EDITOR:ToVector(data)
+	return "\"[" .. data.x .. " " .. data.y .. " " .. data.z .. "]\"";
+end
+
+-- Used to parse colors.
+function GLOBALS_3D_PARTICLE_EDITOR:ToColor(data)
+	return "{\"r\":" .. data[1] .. ",\"g\":" .. data[2] .. ",\"b\":" .. data[3] .. ",\"a\":255}";
+end
+
+-- Used to parse colors.
+function GLOBALS_3D_PARTICLE_EDITOR:ToVectorColor(data)
+	return "{\"r\":" .. data.r .. ",\"g\":" .. data.g .. ",\"b\":" .. data.b .. ",\"a\":255}";
+end
+
+function GLOBALS_3D_PARTICLE_EDITOR:ConvertConfig(config)
+
+	-- Convert JSON config file format to usable types.
+	local particles = self:DeserializeParticles(config);
+
+	-- Convert types to editor types.
+	for k,v in pairs(particles) do
+		for x,y in pairs(v) do
+			if (isstring(y)) then particles[k][x] = self:ToGeneric(y); continue; end
+			if (isnumber(y)) then particles[k][x] = self:ToNumber(y); continue; end
+			if (isangle(y))  then particles[k][x] = self:ToAngle(y); continue; end
+			if (isvector(y)) then particles[k][x] = self:ToVector(y); continue; end
+			if (isbool(y)) then continue; end
+			particles[k][x] = self:ToVectorColor(y);
+		end
+	end
+
+	return particles;
+end
+
 function GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon)
 
 	local data = "{";
@@ -59,9 +109,9 @@ function GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon)
 	return data;
 end
 
-function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(weapon)
+function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(data)
 
-	local particles = util.JSONToTable(self:SerializeParticles(weapon));
+	local particles = util.JSONToTable(data);
 	if (particles == nil) then
 		return {};
 	end
@@ -69,9 +119,8 @@ function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(weapon)
 	return particles;
 end
 
-function GLOBALS_3D_PARTICLE_EDITOR:ParseParticles(weapon)
+function GLOBALS_3D_PARTICLE_EDITOR:ParseParticles(particles)
 
-	local particles = self:DeserializeParticles(weapon);
 	for k,v in pairs(particles) do
 
 		-- Since JSON and DPropertyLists can't handle nil or empty values,
@@ -110,6 +159,8 @@ if (CLIENT) then
 		local system = net.ReadEntity();
 
 		-- Upload configuration file to system.
-		system:InitializeParticles(GLOBALS_3D_PARTICLE_EDITOR:ParseParticles(weapon));
+		local data = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon);
+		local particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(data);
+		system:InitializeParticles(GLOBALS_3D_PARTICLE_EDITOR:ParseParticles(particles));
 	end);
 end
