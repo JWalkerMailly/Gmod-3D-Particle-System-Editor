@@ -208,7 +208,7 @@ function TOOL.BuildCPanel(panel, worker, config)
 		-- Use data transfer entity to create and load properties into property panel editor.
 		for k,v in pairs(particles) do
 			entry:SetValue(k);
-			GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, entry:GetValue(), true);
+			GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, entry, true);
 		end
 	end
 end
