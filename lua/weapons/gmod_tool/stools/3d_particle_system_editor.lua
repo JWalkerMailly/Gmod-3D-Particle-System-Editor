@@ -264,6 +264,7 @@ local function AddParticlePanel(weapon, panel, entry, useConfig)
 				AddParticlePropertyPanel(weapon, particleProps, label, "InheritPos", 			"Transform", "Inherit Pos", 		"Boolean", 		{}, nil, true, useConfig);
 				AddParticlePropertyPanel(weapon, particleProps, label, "Pos", 					"Transform", "Position", 			"Generic", 		{}, nil, "[0 0 0]", useConfig);
 				AddParticlePropertyPanel(weapon, particleProps, label, "LocalPos", 				"Transform", "Local Position", 		"Generic", 		{}, nil, "[0 0 0]", useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "InheritAngles", 		"Transform", "Inherit Angles", 		"Boolean", 		{}, nil, false, useConfig);
 				AddParticlePropertyPanel(weapon, particleProps, label, "Angles", 				"Transform", "Angles", 				"Generic", 		{}, nil, "{0 0 0}", useConfig);
 
 				-- Timing properties.

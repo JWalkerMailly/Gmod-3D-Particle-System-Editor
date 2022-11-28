@@ -140,6 +140,7 @@ if (CLIENT) then
 			-- Since JSON and DPropertyLists can't handle nil or empty values,
 			-- nil states must be handled manually according to the desired behavior.
 			if (v.InheritPos) 		then v.Pos 			= nil; end
+			if (v.InheritAngles) 	then v.Angles		= nil; end
 			if (v.InheritLifeTime) 	then v.LifeTime 	= nil; end
 			if (!v.UseEndRotation) 	then v.EndRotation 	= nil; end
 			if (!v.UseEndColor) 	then v.EndColor 	= nil; end
