@@ -126,10 +126,33 @@ local function SetParticlePropertyValue(weapon, particle, prop, type, value)
 	weapon.Particles[particle:GetText()][prop] = value;
 end
 
-local function AddParticlePropertyPanel(weapon, panel, particle, prop, category, name, type, settings, choices, default)
+local function GetPropertyDefault(weapon, particle, prop, type, fallback)
+
+	local property = weapon.Particles[particle:GetText()][prop];
+	if (property != nil) then
+
+		if (type == "VectorColor") then
+			local color = util.JSONToTable(property);
+			return Vector(color.r, color.g, color.b);
+		end
+
+		if (type == "Generic" || type == "Combo") then
+			return string.sub(property, 2, -2);
+		end
+	end
+
+	return property || fallback;
+end
+
+local function AddParticlePropertyPanel(weapon, panel, particle, prop, category, name, type, settings, choices, default, useConfig)
 
 	-- Create property editor.
-	SetParticlePropertyValue(weapon, particle, prop, type, default);
+	local defaultValue = GetPropertyDefault(weapon, particle, prop, type, default);
+
+	if (!useConfig) then
+		SetParticlePropertyValue(weapon, particle, prop, type, defaultValue);
+	end
+
 	local editor = panel:CreateRow(category, name);
 	editor:Setup(type, settings);
 	editor.DataChanged = function(_, val)
@@ -157,19 +180,19 @@ local function AddParticlePropertyPanel(weapon, panel, particle, prop, category,
 	end
 
 	-- Set default value after initialization.
-	if (default != nil) then editor:SetValue(default); end
+	if (defaultValue != nil) then editor:SetValue(defaultValue); end
 end
 
-local function AddParticlePanel(weapon, panel, entry, force)
+local function AddParticlePanel(weapon, panel, entry, useConfig)
 
 	-- Do nothing if the particle we are trying to create already exists.
 	local particleName = entry:GetValue();
-	if (weapon.Particles[particleName] != nil && !force) then
+	if (weapon.Particles[particleName] != nil && !useConfig) then
 		return;
 	end
 
 	-- Initialize particle array for editor key values.
-	if (!force) then
+	if (!useConfig) then
 		weapon.Particles[particleName] = {};
 	end
 
@@ -232,54 +255,54 @@ local function AddParticlePanel(weapon, panel, entry, force)
 				-- Rendering properties.
 				local model = "models/hunter/misc/sphere075x075.mdl";
 				local material = "models/props_combine/portalball001_sheet";
-				AddParticlePropertyPanel(weapon, particleProps, label, "Model", 				"Rendering", "Model", 				"Generic", 		{}, nil, model);
-				AddParticlePropertyPanel(weapon, particleProps, label, "Skin", 					"Rendering", "Skin", 				"Int", 			{ min = 0, max = 100 }, nil, 0);
-				AddParticlePropertyPanel(weapon, particleProps, label, "BodyGroups", 			"Rendering", "Body Groups", 		"Generic", 		{}, nil, "0");
-				AddParticlePropertyPanel(weapon, particleProps, label, "Material", 				"Rendering", "Material", 			"Generic", 		{}, nil, material);
+				AddParticlePropertyPanel(weapon, particleProps, label, "Model", 				"Rendering", "Model", 				"Generic", 		{}, nil, model, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "Skin", 					"Rendering", "Skin", 				"Int", 			{ min = 0, max = 100 }, nil, 0, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "BodyGroups", 			"Rendering", "Body Groups", 		"Generic", 		{}, nil, "0", useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "Material", 				"Rendering", "Material", 			"Generic", 		{}, nil, material, useConfig);
 
 				-- Transform properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "InheritPos", 			"Transform", "Inherit Pos", 		"Boolean", 		{}, nil, true);
-				AddParticlePropertyPanel(weapon, particleProps, label, "Pos", 					"Transform", "Position", 			"Generic", 		{}, nil, "[0 0 0]");
-				AddParticlePropertyPanel(weapon, particleProps, label, "LocalPos", 				"Transform", "Local Position", 		"Generic", 		{}, nil, "[0 0 0]");
-				AddParticlePropertyPanel(weapon, particleProps, label, "Angles", 				"Transform", "Angles", 				"Generic", 		{}, nil, "{0 0 0}");
+				AddParticlePropertyPanel(weapon, particleProps, label, "InheritPos", 			"Transform", "Inherit Pos", 		"Boolean", 		{}, nil, true, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "Pos", 					"Transform", "Position", 			"Generic", 		{}, nil, "[0 0 0]", useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "LocalPos", 				"Transform", "Local Position", 		"Generic", 		{}, nil, "[0 0 0]", useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "Angles", 				"Transform", "Angles", 				"Generic", 		{}, nil, "{0 0 0}", useConfig);
 
 				-- Timing properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "Delay", 				"Timing", "Delay", 					"Float", 		{ min = 0, max = 60 }, nil, 0);
-				AddParticlePropertyPanel(weapon, particleProps, label, "InheritLifeTime", 		"Timing", "Inherit Life Time", 		"Boolean", 		{}, nil, false);
-				AddParticlePropertyPanel(weapon, particleProps, label, "LifeTime", 				"Timing", "Life Time", 				"Float", 		{ min = 0, max = 60 * 5 }, nil, 1);
-				AddParticlePropertyPanel(weapon, particleProps, label, "Looping", 				"Timing", "Looping", 				"Boolean", 		{}, nil, false);
+				AddParticlePropertyPanel(weapon, particleProps, label, "Delay", 				"Timing", "Delay", 					"Float", 		{ min = 0, max = 60 }, nil, 0, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "InheritLifeTime", 		"Timing", "Inherit Life Time", 		"Boolean", 		{}, nil, false, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "LifeTime", 				"Timing", "Life Time", 				"Float", 		{ min = 0, max = 60 * 5 }, nil, 1, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "Looping", 				"Timing", "Looping", 				"Boolean", 		{}, nil, false, useConfig);
 
 				-- Rotation properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotationFunction", 		"Rotation", "Function", 			"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine");
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotationNormal", 		"Rotation", "Rotation Normal", 		"Generic", 		{}, nil, "[0 0 0]");
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotateAroundNormal", 	"Rotation", "Rotate Around Normal", "Boolean", 		{}, nil, true);
-				AddParticlePropertyPanel(weapon, particleProps, label, "StartRotation", 		"Rotation", "Start Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0);
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndRotation", 		"Rotation", "Use End Rotation", 	"Boolean", 		{}, nil, false);
-				AddParticlePropertyPanel(weapon, particleProps, label, "EndRotation", 			"Rotation", "End Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0);
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotationFunctionMod", 	"Rotation", "Rotation Rate", 		"Float", 		{ min = -360000, max = 360000 }, nil, 1);
+				AddParticlePropertyPanel(weapon, particleProps, label, "RotationFunction", 		"Rotation", "Function", 			"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine", useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "RotationNormal", 		"Rotation", "Rotation Normal", 		"Generic", 		{}, nil, "[0 0 0]", useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "RotateAroundNormal", 	"Rotation", "Rotate Around Normal", "Boolean", 		{}, nil, true, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "StartRotation", 		"Rotation", "Start Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndRotation", 		"Rotation", "Use End Rotation", 	"Boolean", 		{}, nil, false, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "EndRotation", 			"Rotation", "End Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "RotationFunctionMod", 	"Rotation", "Rotation Rate", 		"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 
 				-- Color properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "ColorFunction", 		"Color", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine");
-				AddParticlePropertyPanel(weapon, particleProps, label, "StartColor", 			"Color", "Start Color", 			"VectorColor", 	{}, nil, Vector(255, 255, 255));
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndColor", 			"Color", "Use End Color", 			"Boolean", 		{}, nil, false);
-				AddParticlePropertyPanel(weapon, particleProps, label, "EndColor", 				"Color", "End Color", 				"VectorColor", 	{}, nil, Vector(255, 255, 255));
-				AddParticlePropertyPanel(weapon, particleProps, label, "ColorFunctionMod", 		"Color", "Color Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1);
+				AddParticlePropertyPanel(weapon, particleProps, label, "ColorFunction", 		"Color", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine", useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "StartColor", 			"Color", "Start Color", 			"VectorColor", 	{}, nil, Vector(255, 255, 255), useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndColor", 			"Color", "Use End Color", 			"Boolean", 		{}, nil, false, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "EndColor", 				"Color", "End Color", 				"VectorColor", 	{}, nil, Vector(255, 255, 255), useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "ColorFunctionMod", 		"Color", "Color Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 
 				-- Alpha properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "AlphaFunction", 		"Alpha", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine");
-				AddParticlePropertyPanel(weapon, particleProps, label, "StartAlpha", 			"Alpha", "Start Alpha", 			"Float", 		{ min = 0, max = 255 }, nil, 255);
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndAlpha", 			"Alpha", "Use End Alpha", 			"Boolean", 		{}, nil, false);
-				AddParticlePropertyPanel(weapon, particleProps, label, "EndAlpha", 				"Alpha", "End Alpha", 				"Float", 		{ min = 0, max = 255 }, nil, 0);
-				AddParticlePropertyPanel(weapon, particleProps, label, "AlphaFunctionMod", 		"Alpha", "Alpha Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1);
+				AddParticlePropertyPanel(weapon, particleProps, label, "AlphaFunction", 		"Alpha", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine", useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "StartAlpha", 			"Alpha", "Start Alpha", 			"Float", 		{ min = 0, max = 255 }, nil, 255, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndAlpha", 			"Alpha", "Use End Alpha", 			"Boolean", 		{}, nil, false, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "EndAlpha", 				"Alpha", "End Alpha", 				"Float", 		{ min = 0, max = 255 }, nil, 0, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "AlphaFunctionMod", 		"Alpha", "Alpha Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 
 				-- Scale properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleFunction", 		"Scale", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine");
-				AddParticlePropertyPanel(weapon, particleProps, label, "StartScale", 			"Scale", "Start Scale", 			"Float", 		{ min = 0, max = 360000 }, nil, 1);
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndScale", 			"Scale", "Use End Scale", 			"Boolean", 		{}, nil, false);
-				AddParticlePropertyPanel(weapon, particleProps, label, "EndScale", 				"Scale", "End Scale", 				"Float", 		{ min = 0, max = 360000 }, nil, 0);
-				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleFunctionMod", 		"Scale", "Scale Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1);
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseScaleAxis", 			"Scale", "Use Scale Axis", 			"Boolean", 		{}, nil, false);
-				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleAxis", 			"Scale", "Scale Axis", 				"Generic", 		{}, nil, "[1 1 1]");
+				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleFunction", 		"Scale", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine", useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "StartScale", 			"Scale", "Start Scale", 			"Float", 		{ min = 0, max = 360000 }, nil, 1, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndScale", 			"Scale", "Use End Scale", 			"Boolean", 		{}, nil, false, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "EndScale", 				"Scale", "End Scale", 				"Float", 		{ min = 0, max = 360000 }, nil, 0, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleFunctionMod", 		"Scale", "Scale Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "UseScaleAxis", 			"Scale", "Use Scale Axis", 			"Boolean", 		{}, nil, false, useConfig);
+				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleAxis", 			"Scale", "Scale Axis", 				"Generic", 		{}, nil, "[1 1 1]", useConfig);
 end
 
 function TOOL.BuildCPanel(panel, weapon, config)
