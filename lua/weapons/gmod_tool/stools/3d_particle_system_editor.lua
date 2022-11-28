@@ -341,11 +341,16 @@ function TOOL.BuildCPanel(panel, weapon, config)
 		configEntry:Dock(TOP);
 
 		-- Save particle system button.
+		local browser = nil;
 		local saveConfig = vgui.Create("DButton", configCategory);
 		saveConfig:SetText("Save Particle System");
 		saveConfig:Dock(TOP);
 		function saveConfig:DoClick()
-			print("Do save here");
+
+			-- Seralize particle data and srite to file.
+			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon);
+			file.Write("3d_particle_system_editor/" .. configEntry:GetValue() .. ".txt", serialize);
+			browser:SetCurrentFolder("3d_particle_system_editor");
 		end
 
 		-- Print particle button.
@@ -364,7 +369,7 @@ function TOOL.BuildCPanel(panel, weapon, config)
 
 		-- Add file browser for configuration support.
 		file.CreateDir("3d_particle_system_editor/");
-		local browser = vgui.Create("DFileBrowser", configCategory);
+		browser = vgui.Create("DFileBrowser", configCategory);
 		browser:Dock(TOP);
 		browser:SetPath("GAME");
 		browser:SetBaseFolder("data");
