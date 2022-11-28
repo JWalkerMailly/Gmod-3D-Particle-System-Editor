@@ -167,7 +167,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:GetPropertyDefault(worker, particle, prop, t
 	return property || fallback;
 end
 
-function GLOBALS_3D_PARTICLE_EDITOR:self:AddParticlePropertyRow(worker, panel, particle, prop, category, name, type, settings, choices, default, useConfig)
+function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyRow(worker, panel, particle, prop, category, name, type, settings, choices, default, useConfig)
 
 	-- Get the default value either form the worker, or the fallback. If we are using a configuration
 	-- file, the worker will already have all its properties loaded. We'll transform the value for the editor.
@@ -281,7 +281,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 
 			-- Particle properties list.
 			local particleProps = vgui.Create("DProperties", container);
-			particleProps:SetHeight(37 * 24.5);
+			particleProps:SetHeight(925);
 			particleProps:Dock(TOP);
 
 				-- Rendering properties.
@@ -351,6 +351,9 @@ if (CLIENT) then
 
 		local worker = net.ReadEntity();
 		local system = net.ReadEntity();
+
+		-- Do nothing if the supplied worker is not ready or empty.
+		if (worker.Particles == nil) then return; end
 
 		-- Upload configuration file to system.
 		local data = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);

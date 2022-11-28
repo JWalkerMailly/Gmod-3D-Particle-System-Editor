@@ -124,7 +124,7 @@ function TOOL.BuildCPanel(panel, worker, config)
 	-- Add particle button.
 	local add = panel:Button("Add Particle");
 	function add:DoClick()
-		GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, entry:GetValue());
+		GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, entry);
 	end
 
 	-- Adjust parenting attachment slider.
