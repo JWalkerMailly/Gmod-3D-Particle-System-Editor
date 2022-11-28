@@ -1,5 +1,5 @@
 
-TOOL.Category 	= "Particles";
+TOOL.Category 	= "Effects";
 TOOL.Name 		= "#tool.3d_particle_system_editor.name";
 TOOL.ConfigName = "";
 
