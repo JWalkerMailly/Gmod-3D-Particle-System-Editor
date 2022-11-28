@@ -77,6 +77,8 @@ function ParseParticles(weapon)
 		if (!v.UseEndAlpha) 	then v.EndAlpha 	= nil; end
 		if (!v.UseScaleAxis) 	then v.ScaleAxis 	= Vector(0, 0, 0); end
 		if (!v.UseEndScale) 	then v.EndScale 	= nil; end
+		if (v.Material != "")	then v.Material 	= Material(v.Material);
+		else 						 v.Material 	= nil; end
 
 		-- Convert each string representation to its actual function counterpart.
 		v.RotationFunction 		= GlobalMathFunctionsConversionTable[v.RotationFunction];
@@ -84,8 +86,6 @@ function ParseParticles(weapon)
 		v.AlphaFunction 		= GlobalMathFunctionsConversionTable[v.AlphaFunction];
 		v.ScaleFunction 		= GlobalMathFunctionsConversionTable[v.ScaleFunction];
 	end
-
-	PrintTable(particles)
 
 	return particles;
 end

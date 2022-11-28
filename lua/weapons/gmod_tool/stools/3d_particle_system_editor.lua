@@ -3,7 +3,7 @@ TOOL.Category 	= "Particles";
 TOOL.Name 		= "#tool.3d_particle_system_editor.name";
 TOOL.ConfigName = "";
 
-TOOL.ClientConVar["parent_attachment"] = "0";
+TOOL.ClientConVar["parent_attachment"] = 0;
 
 if (CLIENT) then
 
@@ -17,30 +17,35 @@ if (CLIENT) then
 	language.Add("tool.3d_particle_system_editor.desc", "GUI editor to easily create and test 3D particle effects.");
 
 	language.Add("tool.3d_particle_system_editor.left", "Play particle system.");
-	language.Add("tool.3d_particle_system_editor.right", "Set position. If aimed at an entity, will parent the system to it.");
+	language.Add("tool.3d_particle_system_editor.right", "Parent / Set position.");
+	language.Add("tool.3d_particle_system_editor.reload", "Parent particle system to yourself.");
 
-	language.Add("tool.3d_particle_system_editor.parent_attachment", "Attachment");
+	language.Add("tool.3d_particle_system_editor.parent_attachment", "Parent Attachment");
 end
 
-function TOOL:UpdateParticleSystem(trace)
+function TOOL:UpdateParticleSystemPosition(trace)
 
 	-- Update system's position.
 	local system = self:GetWeapon():GetNWEntity("System");
 	system:SetPos(trace.HitPos);
+	system:SetParent(nil);
 end
 
-function TOOL:SetSystemParent(entity)
+function TOOL:UpdateParticleSystemParent(parent)
 
-	-- If the entity is invalid, do nothing.
-	if (!entity:IsValid()) then return; end
-	self:GetWeapon():SetNWEntity("Parent", entity);
+	-- If the parent is invalid, do nothing.
+	if (!parent:IsValid()) then return; end
+	self:GetWeapon():SetNWEntity("Parent", parent);
 
 	-- Parent system the entity.
 	local system = self:GetWeapon():GetNWEntity("System");
-	system:SetParent(entity, self:GetClientNumber("parent_attachment"));
+	system:SetPos(parent:GetPos());
+	system:SetParent(parent, self:GetClientNumber("parent_attachment"));
 end
 
 function TOOL:LeftClick(trace)
+
+	if (!SERVER) then return; end
 
 	-- Network weapon data to client side to start initializing particles with editor data.
 	local weapon = self:GetWeapon();
@@ -54,11 +59,24 @@ end
 
 function TOOL:RightClick(trace)
 
-	if (trace.Entity != NULL) then
-		self:UpdateParticleSystem(trace);
-		self:SetSystemParent(trace.Entity);
-	end
+	if (!SERVER) then return; end
 
+	-- Delegate positioning anf parenting to appropriate method.
+	if (!trace.HitWorld && trace.Entity != NULL) then self:UpdateParticleSystemParent(trace.Entity);
+	else self:UpdateParticleSystemPosition(trace); end
+
+	-- Begin network call to particle system.
+	self:LeftClick(trace);
+	return true;
+end
+
+function TOOL:Reload()
+
+	if (!SERVER) then return; end
+
+	-- Begin network call to particle system.
+	self:UpdateParticleSystemParent(self:GetOwner());
+	self:LeftClick(trace);
 	return true;
 end
 
@@ -82,7 +100,7 @@ function TOOL:Think()
 	if (SERVER && (system == NULL || system == nil || !system:IsValid())) then
 
 		local emitter = ents.Create("3d_particle_system");
-		emitter:SetLifeTime(10000)
+		emitter:SetLifeTime(60 * 60)
 		emitter:SetPos(Vector(0, 0, 0));
 		emitter:Spawn();
 
@@ -210,10 +228,11 @@ local function AddParticlePanel(weapon, root, entry)
 
 				-- Rendering properties.
 				local model = "models/hunter/misc/sphere075x075.mdl";
+				local material = "models/props_combine/portalball001_sheet";
 				AddParticlePropertyPanel(weapon, particleProps, label, "Model", 				"Rendering", "Model", 				"Generic", 		{}, nil, model);
 				AddParticlePropertyPanel(weapon, particleProps, label, "Skin", 					"Rendering", "Skin", 				"Int", 			{ min = 0, max = 100 }, nil, 0);
 				AddParticlePropertyPanel(weapon, particleProps, label, "BodyGroups", 			"Rendering", "Body Groups", 		"Generic", 		{}, nil, "0");
-				AddParticlePropertyPanel(weapon, particleProps, label, "Material", 				"Rendering", "Material", 			"Generic", 		{}, nil, nil);
+				AddParticlePropertyPanel(weapon, particleProps, label, "Material", 				"Rendering", "Material", 			"Generic", 		{}, nil, material);
 
 				-- Transform properties.
 				AddParticlePropertyPanel(weapon, particleProps, label, "InheritPos", 			"Transform", "Inherit Pos", 		"Boolean", 		{}, nil, true);
@@ -263,9 +282,7 @@ end
 function TOOL.BuildCPanel(root, weapon)
 
 	-- Wait for weapon to be initialized before creating the panel.
-	if (weapon == nil) then
-		return;
-	end
+	if (weapon == nil) then return; end
 
 	-- Prepare weapon to hold client side references.
 	if (weapon.Particles == nil) then
@@ -282,6 +299,9 @@ function TOOL.BuildCPanel(root, weapon)
 	function add:DoClick()
 		AddParticlePanel(weapon, root, entry);
 	end
+
+	-- Adjust parenting attachment.
+	root:AddControl("Slider", { Label = "#tool.3d_particle_system_editor.parent_attachment", Max = 50, Command = "3d_particle_system_editor_parent_attachment" })
 end
 
 function TOOL:DrawHUD()
