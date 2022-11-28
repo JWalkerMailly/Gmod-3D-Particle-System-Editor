@@ -335,12 +335,60 @@ function TOOL.BuildCPanel(panel, weapon, config)
 	configCategory:SetExpanded(false);
 	panel:AddItem(configCategory);
 
+		-- Config filename input.
+		local configEntry = vgui.Create("DTextEntry", configCategory);
+		configEntry:SetValue("System 1");
+		configEntry:Dock(TOP);
+
+		-- Save particle system button.
+		local saveConfig = vgui.Create("DButton", configCategory);
+		saveConfig:SetText("Save Particle System");
+		saveConfig:Dock(TOP);
+		function saveConfig:DoClick()
+			print("Do save here");
+		end
+
 		-- Print particle button.
 		local printConfig = vgui.Create("DButton", configCategory);
-		printConfig:SetText("Print Config");
+		printConfig:SetText("Print Particle System");
 		printConfig:Dock(TOP);
 		function printConfig:DoClick()
 			print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon));
+		end
+
+		local label = vgui.Create("DLabel", configCategory);
+		label:SetText("");
+		label:SetHeight(0);
+		label:SetAlpha(0);
+		label:Dock(TOP);
+
+		-- Add file browser for configuration support.
+		file.CreateDir("3d_particle_system_editor/");
+		local browser = vgui.Create("DFileBrowser", configCategory);
+		browser:Dock(TOP);
+		browser:SetPath("GAME");
+		browser:SetBaseFolder("data");
+		browser:SetOpen(true);
+		browser:SetCurrentFolder("3d_particle_system_editor");
+		browser:SetHeight(300);
+		function browser:OnSelect(path, sender)
+			label:SetText(path);
+		end
+
+		-- Print particle button.
+		local loadConfig = vgui.Create("DButton", configCategory);
+		loadConfig:SetText("Load Config");
+		loadConfig:Dock(TOP);
+		function loadConfig:DoClick()
+
+			local filePath = label:GetText();
+			if (filePath != nil && filePath != "") then
+
+				local tool = weapon:GetOwner():GetTool();
+				local state = file.Read(string.Replace(filePath, "data/", ""));
+				panel:ClearControls();
+				tool.BuildCPanel(panel, weapon, state);
+			end
 		end
 
 	-- Load configuration file if provided.
