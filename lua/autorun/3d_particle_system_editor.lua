@@ -126,6 +126,34 @@ function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(config, worker)
 	return particles;
 end
 
+function GLOBALS_3D_PARTICLE_EDITOR:ParseConfiguration(config)
+
+	local particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticlesToSource(config);
+	for k,v in pairs(particles) do
+
+		-- Since JSON and DPropertyLists can't handle nil or empty values,
+		-- nil states must be handled manually according to the desired behavior.
+		if (v.InheritPos) 		then v.Pos 			= nil; end
+		if (v.InheritAngles) 	then v.Angles		= nil; end
+		if (v.InheritLifeTime) 	then v.LifeTime 	= nil; end
+		if (!v.UseEndRotation) 	then v.EndRotation 	= nil; end
+		if (!v.UseEndColor) 	then v.EndColor 	= nil; end
+		if (!v.UseEndAlpha) 	then v.EndAlpha 	= nil; end
+		if (!v.UseScaleAxis) 	then v.ScaleAxis 	= Vector(0, 0, 0); end
+		if (!v.UseEndScale) 	then v.EndScale 	= nil; end
+		if (v.Material != "")	then v.Material 	= Material(v.Material);
+		else 						 v.Material 	= nil; end
+
+		-- Convert each string representation to its actual math function counterpart.
+		v.RotationFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.RotationFunction];
+		v.ColorFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.ColorFunction];
+		v.AlphaFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.AlphaFunction];
+		v.ScaleFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.ScaleFunction];
+	end
+
+	return particles;
+end
+
 function GLOBALS_3D_PARTICLE_EDITOR:SetParticlePropertyValue(worker, particle, prop, type, value)
 
 	-- Vector color is a special case. We handle JSON serialization manually since its data
@@ -355,31 +383,9 @@ if (CLIENT) then
 		-- Do nothing if the supplied worker is not ready or empty.
 		if (worker.Particles == nil) then return; end
 
-		-- Upload configuration file to system.
+		-- Upload configuration to system.
 		local data = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
-		local particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticlesToSource(data);
-		for k,v in pairs(particles) do
-
-			-- Since JSON and DPropertyLists can't handle nil or empty values,
-			-- nil states must be handled manually according to the desired behavior.
-			if (v.InheritPos) 		then v.Pos 			= nil; end
-			if (v.InheritAngles) 	then v.Angles		= nil; end
-			if (v.InheritLifeTime) 	then v.LifeTime 	= nil; end
-			if (!v.UseEndRotation) 	then v.EndRotation 	= nil; end
-			if (!v.UseEndColor) 	then v.EndColor 	= nil; end
-			if (!v.UseEndAlpha) 	then v.EndAlpha 	= nil; end
-			if (!v.UseScaleAxis) 	then v.ScaleAxis 	= Vector(0, 0, 0); end
-			if (!v.UseEndScale) 	then v.EndScale 	= nil; end
-			if (v.Material != "")	then v.Material 	= Material(v.Material);
-			else 						 v.Material 	= nil; end
-
-			-- Convert each string representation to its actual math function counterpart.
-			v.RotationFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.RotationFunction];
-			v.ColorFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.ColorFunction];
-			v.AlphaFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.AlphaFunction];
-			v.ScaleFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.ScaleFunction];
-		end
-
+		local particles = GLOBALS_3D_PARTICLE_EDITOR:ParseConfiguration(data);
 		system:InitializeParticles(particles);
 	end);
 end
