@@ -93,7 +93,7 @@ function TOOL:Think()
 		local panel = controlpanel.Get("3d_particle_system_editor");
 		panel:ClearControls();
 
-		self.BuildCPanel(panel, weapon, "{\"Particle 1\":{\"StartColor\":{\"r\":255,\"g\":255,\"b\":255,\"a\":255},\"RotationNormal\":\"[0 0 0]\",\"ColorFunctionMod\":1,\"Delay\":0,\"AlphaFunctionMod\":1,\"UseEndColor\":false,\"EndAlpha\":0,\"ColorFunction\":\"Sine\",\"StartRotation\":0,\"RotationFunction\":\"Sine\",\"LifeTime\":1,\"UseEndAlpha\":false,\"BodyGroups\":\"0\",\"AlphaFunction\":\"Sine\",\"RotateAroundNormal\":true,\"LocalPos\":\"[0 0 0]\",\"RotationFunctionMod\":1,\"Looping\":false,\"InheritPos\":true,\"StartAlpha\":255,\"ScaleAxis\":\"[1 1 1]\",\"UseScaleAxis\":false,\"ScaleFunctionMod\":1,\"InheritLifeTime\":false,\"Skin\":0,\"EndColor\":{\"r\":255,\"g\":255,\"b\":255,\"a\":255},\"Material\":\"models/props_combine/portalball001_sheet\",\"UseEndRotation\":false,\"Angles\":\"{0 0 0}\",\"Pos\":\"[0 0 0]\",\"EndRotation\":0,\"ScaleFunction\":\"Sine\",\"UseEndScale\":true,\"EndScale\":10,\"Model\":\"models/hunter/misc/sphere075x075.mdl\",\"StartScale\":1}}");
+		self.BuildCPanel(panel, weapon);
 		self.PanelInitialized = true;
 	end
 
