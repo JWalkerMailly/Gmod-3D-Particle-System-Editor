@@ -1,8 +1,10 @@
 
+GLOBALS_3D_PARTICLE_EDITOR = {};
+
 -- This is only used internally by the configuration module. Configs
 -- are JSON files and since we can't store function references, we need
 -- to setup a lookup table and manually do the conversions.
-GlobalMathFunctionsConversionTable = {
+GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable = {
 	["Sine"] 			= math.sin,
 	["Cosine"] 			= math.cos,
 	["Tangent"] 		= math.tan,
@@ -38,7 +40,7 @@ GlobalMathFunctionsConversionTable = {
 	["OutSine"] 		= math.ease.OutSine
 };
 
-function DeserializeParticles(weapon)
+function GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon)
 
 	local data = "{";
 	for k,v in pairs(weapon.Particles) do
@@ -54,8 +56,12 @@ function DeserializeParticles(weapon)
 
 	data = data:sub(1, -2);
 	data = data .. "}";
+	return data;
+end
 
-	local particles = util.JSONToTable(data);
+function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(weapon)
+
+	local particles = util.JSONToTable(self:SerializeParticles(weapon));
 	if (particles == nil) then
 		return {};
 	end
@@ -63,9 +69,9 @@ function DeserializeParticles(weapon)
 	return particles;
 end
 
-function ParseParticles(weapon)
+function GLOBALS_3D_PARTICLE_EDITOR:ParseParticles(weapon)
 
-	local particles = DeserializeParticles(weapon);
+	local particles = self:DeserializeParticles(weapon);
 	for k,v in pairs(particles) do
 
 		-- Since JSON and DPropertyLists can't handle nil or empty values,
@@ -81,10 +87,10 @@ function ParseParticles(weapon)
 		else 						 v.Material 	= nil; end
 
 		-- Convert each string representation to its actual function counterpart.
-		v.RotationFunction 		= GlobalMathFunctionsConversionTable[v.RotationFunction];
-		v.ColorFunction 		= GlobalMathFunctionsConversionTable[v.ColorFunction];
-		v.AlphaFunction 		= GlobalMathFunctionsConversionTable[v.AlphaFunction];
-		v.ScaleFunction 		= GlobalMathFunctionsConversionTable[v.ScaleFunction];
+		v.RotationFunction 		= self.MathFunctionsConversionTable[v.RotationFunction];
+		v.ColorFunction 		= self.MathFunctionsConversionTable[v.ColorFunction];
+		v.AlphaFunction 		= self.MathFunctionsConversionTable[v.AlphaFunction];
+		v.ScaleFunction 		= self.MathFunctionsConversionTable[v.ScaleFunction];
 	end
 
 	return particles;
@@ -104,6 +110,6 @@ if (CLIENT) then
 		local system = net.ReadEntity();
 
 		-- Upload configuration file to system.
-		system:InitializeParticles(ParseParticles(weapon));
+		system:InitializeParticles(GLOBALS_3D_PARTICLE_EDITOR:ParseParticles(weapon));
 	end);
 end

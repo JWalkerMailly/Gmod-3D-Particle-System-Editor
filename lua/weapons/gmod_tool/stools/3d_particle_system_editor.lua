@@ -10,14 +10,15 @@ if (CLIENT) then
 	TOOL.Information = {
 		{name = "info", stage = 1},
 		{name = "left"},
-		{name = "right"}
+		{name = "right"},
+		{name = "reload"}
 	};
 
 	language.Add("tool.3d_particle_system_editor.name", "3D Particle System Editor");
 	language.Add("tool.3d_particle_system_editor.desc", "GUI editor to easily create and test 3D particle effects.");
 
-	language.Add("tool.3d_particle_system_editor.left", "Play particle system.");
-	language.Add("tool.3d_particle_system_editor.right", "Parent / Set position.");
+	language.Add("tool.3d_particle_system_editor.left", "Play / Update particle system.");
+	language.Add("tool.3d_particle_system_editor.right", "Set position / Parent to entity.");
 	language.Add("tool.3d_particle_system_editor.reload", "Parent particle system to yourself.");
 
 	language.Add("tool.3d_particle_system_editor.parent_attachment", "Parent Attachment");
@@ -247,30 +248,30 @@ local function AddParticlePanel(weapon, root, entry)
 				AddParticlePropertyPanel(weapon, particleProps, label, "Looping", 				"Timing", "Looping", 				"Boolean", 		{}, nil, false);
 
 				-- Rotation properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotationFunction", 		"Rotation", "Function", 			"Combo", 		{}, GlobalMathFunctionsConversionTable, "Sine");
+				AddParticlePropertyPanel(weapon, particleProps, label, "RotationFunction", 		"Rotation", "Function", 			"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine");
 				AddParticlePropertyPanel(weapon, particleProps, label, "RotationNormal", 		"Rotation", "Rotation Normal", 		"Generic", 		{}, nil, "[0 0 0]");
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotateAroundNormal", 	"Rotation", "Rotate Around Normal", "Boolean", 		{}, nil, false);
+				AddParticlePropertyPanel(weapon, particleProps, label, "RotateAroundNormal", 	"Rotation", "Rotate Around Normal", "Boolean", 		{}, nil, true);
 				AddParticlePropertyPanel(weapon, particleProps, label, "StartRotation", 		"Rotation", "Start Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0);
 				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndRotation", 		"Rotation", "Use End Rotation", 	"Boolean", 		{}, nil, false);
 				AddParticlePropertyPanel(weapon, particleProps, label, "EndRotation", 			"Rotation", "End Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0);
 				AddParticlePropertyPanel(weapon, particleProps, label, "RotationFunctionMod", 	"Rotation", "Rotation Rate", 		"Float", 		{ min = -360000, max = 360000 }, nil, 1);
 
 				-- Color properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "ColorFunction", 		"Color", "Function", 				"Combo", 		{}, GlobalMathFunctionsConversionTable, "Sine");
+				AddParticlePropertyPanel(weapon, particleProps, label, "ColorFunction", 		"Color", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine");
 				AddParticlePropertyPanel(weapon, particleProps, label, "StartColor", 			"Color", "Start Color", 			"VectorColor", 	{}, nil, Vector(255, 255, 255));
 				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndColor", 			"Color", "Use End Color", 			"Boolean", 		{}, nil, false);
 				AddParticlePropertyPanel(weapon, particleProps, label, "EndColor", 				"Color", "End Color", 				"VectorColor", 	{}, nil, Vector(255, 255, 255));
 				AddParticlePropertyPanel(weapon, particleProps, label, "ColorFunctionMod", 		"Color", "Color Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1);
 
 				-- Alpha properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "AlphaFunction", 		"Alpha", "Function", 				"Combo", 		{}, GlobalMathFunctionsConversionTable, "Sine");
+				AddParticlePropertyPanel(weapon, particleProps, label, "AlphaFunction", 		"Alpha", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine");
 				AddParticlePropertyPanel(weapon, particleProps, label, "StartAlpha", 			"Alpha", "Start Alpha", 			"Float", 		{ min = 0, max = 255 }, nil, 255);
 				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndAlpha", 			"Alpha", "Use End Alpha", 			"Boolean", 		{}, nil, false);
 				AddParticlePropertyPanel(weapon, particleProps, label, "EndAlpha", 				"Alpha", "End Alpha", 				"Float", 		{ min = 0, max = 255 }, nil, 0);
 				AddParticlePropertyPanel(weapon, particleProps, label, "AlphaFunctionMod", 		"Alpha", "Alpha Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1);
 
 				-- Scale properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleFunction", 		"Scale", "Function", 				"Combo", 		{}, GlobalMathFunctionsConversionTable, "Sine");
+				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleFunction", 		"Scale", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine");
 				AddParticlePropertyPanel(weapon, particleProps, label, "StartScale", 			"Scale", "Start Scale", 			"Float", 		{ min = 0, max = 360000 }, nil, 1);
 				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndScale", 			"Scale", "Use End Scale", 			"Boolean", 		{}, nil, false);
 				AddParticlePropertyPanel(weapon, particleProps, label, "EndScale", 				"Scale", "End Scale", 				"Float", 		{ min = 0, max = 360000 }, nil, 0);
@@ -289,6 +290,12 @@ function TOOL.BuildCPanel(root, weapon)
 		weapon.Particles = {};
 	end
 
+	-- Stop particle button.
+	local export = root:Button("Print Config");
+	function export:DoClick()
+		print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon));
+	end
+
 	-- New particle text input.
 	local entry = vgui.Create("DTextEntry");
 	entry:SetValue("Particle 1");
@@ -301,7 +308,7 @@ function TOOL.BuildCPanel(root, weapon)
 	end
 
 	-- Adjust parenting attachment.
-	root:AddControl("Slider", { Label = "#tool.3d_particle_system_editor.parent_attachment", Max = 50, Command = "3d_particle_system_editor_parent_attachment" })
+	root:AddControl("Slider", { Label = "#tool.3d_particle_system_editor.parent_attachment", Max = 50, Command = "3d_particle_system_editor_parent_attachment" });
 end
 
 function TOOL:DrawHUD()
