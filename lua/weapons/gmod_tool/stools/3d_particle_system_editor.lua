@@ -38,7 +38,7 @@ function TOOL:UpdateParticleSystemParent(parent)
 	if (!parent:IsValid()) then return; end
 	self:GetWeapon():SetNWEntity("Parent", parent);
 
-	-- Parent system the entity.
+	-- Parent system to entity.
 	local system = self:GetWeapon():GetNWEntity("System");
 	system:SetPos(parent:GetPos());
 	system:SetParent(parent, self:GetClientNumber("parent_attachment"));
@@ -48,11 +48,13 @@ function TOOL:LeftClick(trace)
 
 	if (!SERVER) then return; end
 
-	-- Network weapon data to client side to start initializing particles with editor data.
-	local weapon = self:GetWeapon();
+	-- Weapon acts as the worker for data transfer between the system and the editor.
+	-- This could be any entity but since we are using a tool, it makes sense to use
+	-- the weapon reference of that tool for the duration of the editor's lifetime.
+	local worker = self:GetWeapon();
 	net.Start("3d_particle_system_upload_config");
-		net.WriteEntity(weapon)
-		net.WriteEntity(weapon:GetNWEntity("System"));
+		net.WriteEntity(worker)
+		net.WriteEntity(worker:GetNWEntity("System"));
 	net.Broadcast();
 
 	return true;
@@ -62,7 +64,7 @@ function TOOL:RightClick(trace)
 
 	if (!SERVER) then return; end
 
-	-- Delegate positioning anf parenting to appropriate method.
+	-- Delegate positioning and parenting to appropriate method.
 	if (!trace.HitWorld && trace.Entity != NULL) then self:UpdateParticleSystemParent(trace.Entity);
 	else self:UpdateParticleSystemPosition(trace); end
 
@@ -83,17 +85,17 @@ end
 
 function TOOL:Think()
 
-	local weapon = self:GetWeapon();
-	local system = weapon:GetNWEntity("System");
+	local worker = self:GetWeapon();
+	local system = worker:GetNWEntity("System");
 
 	-- Initialize control panel once the weapon entity is valid since we will be using it client side
 	-- for networking the editor data to the particle system.
-	if (CLIENT && !self.PanelInitialized && weapon != NULL && weapon != nil && weapon:IsValid()) then
+	if (CLIENT && !self.PanelInitialized && worker != NULL && worker != nil && worker:IsValid()) then
 
 		local panel = controlpanel.Get("3d_particle_system_editor");
 		panel:ClearControls();
 
-		self.BuildCPanel(panel, weapon);
+		self.BuildCPanel(panel, worker);
 		self.PanelInitialized = true;
 	end
 
@@ -105,14 +107,14 @@ function TOOL:Think()
 		emitter:SetPos(Vector(0, 0, 0));
 		emitter:Spawn();
 
-		weapon:SetNWEntity("System", emitter);
+		worker:SetNWEntity("System", emitter);
 	end
 end
 
-function TOOL.BuildCPanel(panel, weapon, config)
+function TOOL.BuildCPanel(panel, worker, config)
 
 	-- Wait for weapon to be initialized before creating the panel.
-	if (weapon == nil) then return; end
+	if (worker == nil) then return; end
 
 	-- New particle text input.
 	local entry = vgui.Create("DTextEntry");
@@ -122,7 +124,7 @@ function TOOL.BuildCPanel(panel, weapon, config)
 	-- Add particle button.
 	local add = panel:Button("Add Particle");
 	function add:DoClick()
-		GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(weapon, panel, entry:GetValue());
+		GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, entry:GetValue());
 	end
 
 	-- Adjust parenting attachment slider.
@@ -148,7 +150,7 @@ function TOOL.BuildCPanel(panel, weapon, config)
 
 			-- Serialize particle data and write to file. If the file exists, it will be overwritten.
 			-- We also reset the file browser to the current folder, this refreshes the file list.
-			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon);
+			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
 			file.Write("3d_particle_system_editor/" .. configEntry:GetValue() .. ".txt", serialize);
 			browser:SetCurrentFolder(browser:GetCurrentFolder());
 		end
@@ -158,7 +160,7 @@ function TOOL.BuildCPanel(panel, weapon, config)
 		printConfig:SetText("Print Particle System");
 		printConfig:Dock(TOP);
 		function printConfig:DoClick()
-			print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon));
+			print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker));
 		end
 
 		local label = vgui.Create("DLabel", configCategory);
@@ -190,10 +192,10 @@ function TOOL.BuildCPanel(panel, weapon, config)
 			if (filePath != nil && filePath != "") then
 
 				-- Call to BuildCPanel to load the configuration.
-				local tool = weapon:GetOwner():GetTool();
+				local tool = worker:GetOwner():GetTool();
 				local state = file.Read(string.Replace(filePath, "data/", ""));
 				panel:ClearControls();
-				tool.BuildCPanel(panel, weapon, state);
+				tool.BuildCPanel(panel, worker, state);
 			end
 		end
 
@@ -201,12 +203,12 @@ function TOOL.BuildCPanel(panel, weapon, config)
 	if (config != nil && config != "") then
 
 		-- Deserialize and load particles onto the worker entity for data transfers.
-		local particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(config, weapon);
+		local particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(config, worker);
 
 		-- Use data transfer entity to create and load properties into property panel editor.
 		for k,v in pairs(particles) do
 			entry:SetValue(k);
-			GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(weapon, panel, entry:GetValue(), true);
+			GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, entry:GetValue(), true);
 		end
 	end
 end
