@@ -105,38 +105,5 @@ if (CLIENT) then
 
 		-- Upload configuration file to system.
 		system:InitializeParticles(ParseParticles(weapon));
-
-		--PrintTable(weapon.Particles);
-
-/*
-		-- Parse update message to proper entities.
-		local system = net.ReadEntity();
-		if (system == NULL || system == nil || !system:IsValid() || system:GetClass() != "3d_particle_system") then
-			return;
-		end
-
-		-- Convert editor functions to actual lua functions for the particle system.
-		local particles = util.JSONToTable(net.ReadString());
-		for k,v in pairs(particles) do
-
-			-- Since JSON and DPropertyLists can't handle nil or empty values,
-			-- nil states must be handled manually according to the desired behavior.
-			if (v.InheritPos) 		then v.Pos 			= nil; end
-			if (v.InheritLifeTime) 	then v.LifeTime 	= nil; end
-			if (!v.UseEndRotation) 	then v.EndRotation 	= nil; end
-			if (!v.UseEndColor) 	then v.EndColor 	= nil; end
-			if (!v.UseEndAlpha) 	then v.EndAlpha 	= nil; end
-			if (!v.UseScaleAxis) 	then v.ScaleAxis 	= Vector(0, 0, 0); end
-			if (!v.UseEndScale) 	then v.EndScale 	= nil; end
-
-			-- Convert each string representation to its actual function counterpart.
-			v.RotationFunction 		= GlobalMathFunctionsConversionTable[v.RotationFunction];
-			v.ColorFunction 		= GlobalMathFunctionsConversionTable[v.ColorFunction];
-			v.AlphaFunction 		= GlobalMathFunctionsConversionTable[v.AlphaFunction];
-			v.ScaleFunction 		= GlobalMathFunctionsConversionTable[v.ScaleFunction];
-		end
-
-		-- Upload configuration file to system.
-		system:InitializeParticles(particles);*/
 	end);
 end
