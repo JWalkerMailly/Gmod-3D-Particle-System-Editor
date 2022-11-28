@@ -99,7 +99,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticlesToSource(data)
 	return particles;
 end
 
-function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticlesToEditor(config)
+function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(config)
 
 	-- Convert JSON config file format to usable types.
 	local particles = self:DeserializeParticlesToSource(config);

@@ -93,7 +93,7 @@ function TOOL:Think()
 		local panel = controlpanel.Get("3d_particle_system_editor");
 		panel:ClearControls();
 
-		self.BuildCPanel(panel, weapon);
+		self.BuildCPanel(panel, weapon, "{\"Particle 1\":{\"StartColor\":{\"r\":255,\"g\":255,\"b\":255,\"a\":255},\"RotationNormal\":\"[0 0 0]\",\"ColorFunctionMod\":1,\"Delay\":0,\"AlphaFunctionMod\":1,\"UseEndColor\":false,\"EndAlpha\":0,\"ColorFunction\":\"Sine\",\"StartRotation\":0,\"RotationFunction\":\"Sine\",\"LifeTime\":1,\"UseEndAlpha\":false,\"BodyGroups\":\"0\",\"AlphaFunction\":\"Sine\",\"RotateAroundNormal\":true,\"LocalPos\":\"[0 0 0]\",\"RotationFunctionMod\":1,\"Looping\":false,\"InheritPos\":true,\"StartAlpha\":255,\"ScaleAxis\":\"[1 1 1]\",\"UseScaleAxis\":false,\"ScaleFunctionMod\":1,\"InheritLifeTime\":false,\"Skin\":0,\"EndColor\":{\"r\":255,\"g\":255,\"b\":255,\"a\":255},\"Material\":\"models/props_combine/portalball001_sheet\",\"UseEndRotation\":false,\"Angles\":\"{0 0 0}\",\"Pos\":\"[0 0 0]\",\"EndRotation\":0,\"ScaleFunction\":\"Sine\",\"UseEndScale\":true,\"EndScale\":10,\"Model\":\"models/hunter/misc/sphere075x075.mdl\",\"StartScale\":1}}");
 		self.PanelInitialized = true;
 	end
 
@@ -160,16 +160,18 @@ local function AddParticlePropertyPanel(weapon, panel, particle, prop, category,
 	if (default != nil) then editor:SetValue(default); end
 end
 
-local function AddParticlePanel(weapon, panel, entry)
+local function AddParticlePanel(weapon, panel, entry, force)
 
 	-- Do nothing if the particle we are trying to create already exists.
 	local particleName = entry:GetValue();
-	if (weapon.Particles[particleName] != nil) then
+	if (weapon.Particles[particleName] != nil && !force) then
 		return;
 	end
 
 	-- Initialize particle array for editor key values.
-	weapon.Particles[particleName] = {};
+	if (!force) then
+		weapon.Particles[particleName] = {};
+	end
 
 	-- Particle collapsible category.
 	local category = vgui.Create("DCollapsibleCategory");
@@ -290,17 +292,6 @@ function TOOL.BuildCPanel(panel, weapon, config)
 		weapon.Particles = {};
 	end
 
-	-- Load configuration file if provided.
-	if (config != nil && config != "") then
-		weapon.Particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticlesToEditor(config);
-	end
-
-	-- Stop particle button.
-	local export = panel:Button("Print Config");
-	function export:DoClick()
-		print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon));
-	end
-
 	-- New particle text input.
 	local entry = vgui.Create("DTextEntry");
 	entry:SetValue("Particle 1");
@@ -314,6 +305,29 @@ function TOOL.BuildCPanel(panel, weapon, config)
 
 	-- Adjust parenting attachment.
 	panel:AddControl("Slider", { Label = "#tool.3d_particle_system_editor.parent_attachment", Max = 50, Command = "3d_particle_system_editor_parent_attachment" });
+
+	-- Add config section to editor.
+	local configCategory = vgui.Create("DCollapsibleCategory");
+	configCategory:SetLabel("Config");
+	configCategory:SetExpanded(false);
+	panel:AddItem(configCategory);
+
+		-- Print particle button.
+		local printConfig = vgui.Create("DButton", configCategory);
+		printConfig:SetText("Print Config");
+		printConfig:Dock(TOP);
+		function printConfig:DoClick()
+			print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon));
+		end
+
+	-- Load configuration file if provided.
+	if (config != nil && config != "") then
+		weapon.Particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(config);
+		for k,v in pairs(weapon.Particles) do
+			entry:SetValue(k);
+			AddParticlePanel(weapon, panel, entry, true);
+		end
+	end
 end
 
 function TOOL:DrawHUD()
