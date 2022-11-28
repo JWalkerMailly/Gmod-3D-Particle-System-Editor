@@ -70,26 +70,6 @@ function GLOBALS_3D_PARTICLE_EDITOR:ToVectorColor(data)
 	return "{\"r\":" .. data.r .. ",\"g\":" .. data.g .. ",\"b\":" .. data.b .. ",\"a\":255}";
 end
 
-function GLOBALS_3D_PARTICLE_EDITOR:ConvertConfig(config)
-
-	-- Convert JSON config file format to usable types.
-	local particles = self:DeserializeParticles(config);
-
-	-- Convert types to editor types.
-	for k,v in pairs(particles) do
-		for x,y in pairs(v) do
-			if (isstring(y)) then particles[k][x] = self:ToGeneric(y); continue; end
-			if (isnumber(y)) then particles[k][x] = self:ToNumber(y); continue; end
-			if (isangle(y))  then particles[k][x] = self:ToAngle(y); continue; end
-			if (isvector(y)) then particles[k][x] = self:ToVector(y); continue; end
-			if (isbool(y)) then continue; end
-			particles[k][x] = self:ToVectorColor(y);
-		end
-	end
-
-	return particles;
-end
-
 function GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon)
 
 	local data = "{";
@@ -109,7 +89,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon)
 	return data;
 end
 
-function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(data)
+function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticlesToSource(data)
 
 	local particles = util.JSONToTable(data);
 	if (particles == nil) then
@@ -119,27 +99,21 @@ function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(data)
 	return particles;
 end
 
-function GLOBALS_3D_PARTICLE_EDITOR:ParseParticles(particles)
+function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticlesToEditor(config)
 
+	-- Convert JSON config file format to usable types.
+	local particles = self:DeserializeParticlesToSource(config);
+
+	-- Convert types to editor types.
 	for k,v in pairs(particles) do
-
-		-- Since JSON and DPropertyLists can't handle nil or empty values,
-		-- nil states must be handled manually according to the desired behavior.
-		if (v.InheritPos) 		then v.Pos 			= nil; end
-		if (v.InheritLifeTime) 	then v.LifeTime 	= nil; end
-		if (!v.UseEndRotation) 	then v.EndRotation 	= nil; end
-		if (!v.UseEndColor) 	then v.EndColor 	= nil; end
-		if (!v.UseEndAlpha) 	then v.EndAlpha 	= nil; end
-		if (!v.UseScaleAxis) 	then v.ScaleAxis 	= Vector(0, 0, 0); end
-		if (!v.UseEndScale) 	then v.EndScale 	= nil; end
-		if (v.Material != "")	then v.Material 	= Material(v.Material);
-		else 						 v.Material 	= nil; end
-
-		-- Convert each string representation to its actual function counterpart.
-		v.RotationFunction 		= self.MathFunctionsConversionTable[v.RotationFunction];
-		v.ColorFunction 		= self.MathFunctionsConversionTable[v.ColorFunction];
-		v.AlphaFunction 		= self.MathFunctionsConversionTable[v.AlphaFunction];
-		v.ScaleFunction 		= self.MathFunctionsConversionTable[v.ScaleFunction];
+		for x,y in pairs(v) do
+			if (isstring(y)) then particles[k][x] = self:ToGeneric(y); continue; end
+			if (isnumber(y)) then particles[k][x] = self:ToNumber(y); continue; end
+			if (isangle(y))  then particles[k][x] = self:ToAngle(y); continue; end
+			if (isvector(y)) then particles[k][x] = self:ToVector(y); continue; end
+			if (isbool(y)) then continue; end
+			particles[k][x] = self:ToVectorColor(y);
+		end
 	end
 
 	return particles;
@@ -160,7 +134,28 @@ if (CLIENT) then
 
 		-- Upload configuration file to system.
 		local data = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon);
-		local particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(data);
-		system:InitializeParticles(GLOBALS_3D_PARTICLE_EDITOR:ParseParticles(particles));
+		local particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticlesToSource(data);
+		for k,v in pairs(particles) do
+
+			-- Since JSON and DPropertyLists can't handle nil or empty values,
+			-- nil states must be handled manually according to the desired behavior.
+			if (v.InheritPos) 		then v.Pos 			= nil; end
+			if (v.InheritLifeTime) 	then v.LifeTime 	= nil; end
+			if (!v.UseEndRotation) 	then v.EndRotation 	= nil; end
+			if (!v.UseEndColor) 	then v.EndColor 	= nil; end
+			if (!v.UseEndAlpha) 	then v.EndAlpha 	= nil; end
+			if (!v.UseScaleAxis) 	then v.ScaleAxis 	= Vector(0, 0, 0); end
+			if (!v.UseEndScale) 	then v.EndScale 	= nil; end
+			if (v.Material != "")	then v.Material 	= Material(v.Material);
+			else 						 v.Material 	= nil; end
+
+			-- Convert each string representation to its actual function counterpart.
+			v.RotationFunction 		= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.RotationFunction];
+			v.ColorFunction 		= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.ColorFunction];
+			v.AlphaFunction 		= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.AlphaFunction];
+			v.ScaleFunction 		= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.ScaleFunction];
+		end
+
+		system:InitializeParticles(particles);
 	end);
 end
