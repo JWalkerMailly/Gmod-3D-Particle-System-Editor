@@ -118,7 +118,7 @@ function TOOL.BuildCPanel(panel, worker, config)
 
 	-- New particle text input.
 	local entry = vgui.Create("DTextEntry");
-	entry:SetValue("Particle 1");
+	entry:SetValue("New Particle");
 	panel:AddItem(entry);
 
 	-- Add particle button.
@@ -138,7 +138,7 @@ function TOOL.BuildCPanel(panel, worker, config)
 
 		-- Config filename input.
 		local configEntry = vgui.Create("DTextEntry", configCategory);
-		configEntry:SetValue("System 1");
+		configEntry:SetValue("New System");
 		configEntry:Dock(TOP);
 
 		-- Save particle system button.
@@ -153,6 +153,7 @@ function TOOL.BuildCPanel(panel, worker, config)
 			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
 			file.Write("3d_particle_system_editor/" .. configEntry:GetValue() .. ".json", serialize);
 			browser:SetCurrentFolder(browser:GetCurrentFolder());
+			worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Saved configuration.");
 		end
 
 		-- Print particle button. The particle configuration will be printed to console.
@@ -180,6 +181,7 @@ function TOOL.BuildCPanel(panel, worker, config)
 		browser:SetHeight(300);
 		function browser:OnSelect(path, sender)
 			label:SetText(path);
+			configEntry:SetValue(string.Replace(string.match(path, "[^/]+$"), ".json", ""));
 		end
 
 		-- Load particle configuration button.
@@ -196,6 +198,7 @@ function TOOL.BuildCPanel(panel, worker, config)
 				local state = file.Read(string.Replace(filePath, "data/", ""));
 				panel:ClearControls();
 				tool.BuildCPanel(panel, worker, state);
+				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Loaded " .. filePath);
 			end
 		end
 
