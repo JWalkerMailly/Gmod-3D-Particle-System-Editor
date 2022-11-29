@@ -118,6 +118,12 @@ end
 
 function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 
+	local function tablelength(T)
+		local count = 0;
+		for _ in pairs(T) do count = count + 1; end
+		return count;
+	end
+
 	-- Wait for weapon to be initialized before creating the panel.
 	if (worker == nil) then return; end
 	local tool = worker:GetOwner():GetTool();
@@ -161,17 +167,22 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 		saveConfig:Dock(TOP);
 		function saveConfig:DoClick()
 
-			if (worker.Particles == nil || #worker.Particles <= 0) then
-				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "No particles to save.");
+			if (worker.Particles == nil || tablelength(worker.Particles) <= 0) then
+				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Nothing to save.");
 				return;
 			end
 
 			-- Serialize particle data and write to file. If the file exists, it will be overwritten.
 			-- We also reset the file browser to the current folder, this refreshes the file list.
 			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
-			file.Write(browser:GetCurrentFolder() .. configEntry:GetValue() .. ".json", serialize);
-			browser:SetCurrentFolder(browser:GetCurrentFolder());
-			worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Saved configuration.");
+			local configFile = string.Replace(browser:GetCurrentFolder() .. "/" .. configEntry:GetValue() .. ".json", "data/", "");
+			file.Write(configFile, serialize);
+			if (!file.Exists(configFile, "DATA")) then
+				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Error: Configuration could not be saved. To backup, use 'Print Particle System' and copy the result from the console.");
+			else
+				browser:SetCurrentFolder(browser:GetCurrentFolder());
+				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Saved configuration.");
+			end
 		end
 
 		-- Print particle button. The particle configuration will be printed to console.
