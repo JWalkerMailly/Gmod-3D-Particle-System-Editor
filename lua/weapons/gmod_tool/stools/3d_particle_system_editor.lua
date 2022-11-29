@@ -120,6 +120,14 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 
 	-- Wait for weapon to be initialized before creating the panel.
 	if (worker == nil) then return; end
+	local tool = worker:GetOwner():GetTool();
+
+	-- Save particle system button.
+	local newSystem = panel:Button("New Particle System");
+	function newSystem:DoClick()
+		panel:ClearControls();
+		tool.BuildCPanel(panel, worker, "", nil, nil);
+	end
 
 	-- New particle text input.
 	local entry = vgui.Create("DTextEntry");
@@ -205,7 +213,6 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 			if (filePath != nil && filePath != "") then
 
 				-- Call to BuildCPanel to load the configuration.
-				local tool = worker:GetOwner():GetTool();
 				local state = file.Read(string.Replace(filePath, "data/", ""));
 				panel:ClearControls();
 				tool.BuildCPanel(panel, worker, state, string.Replace(string.match(filePath, "[^/]+$"), ".json", ""), filePath);
@@ -214,7 +221,7 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 		end
 
 	-- Load configuration file if provided.
-	if (config != nil && config != "") then
+	if (config != nil) then
 
 		-- Deserialize and load particles onto the worker entity for data transfers.
 		local particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(config, worker);
