@@ -336,7 +336,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 
 				-- Rotation properties.
 				self:AddParticlePropertyRow(worker, particleProps, label, "RotationFunction", 	"Rotation", "Function", 			"Combo", 		{}, self.MathFunctionsConversionTable, "Sine", useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "RotationNormal", 	"Rotation", "Rotation Normal", 		"Generic", 		{}, nil, "[0 0 0]", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "RotationNormal", 	"Rotation", "Rotation Normal", 		"Generic", 		{}, nil, "[0 0 1]", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "RotateAroundNormal", "Rotation", "Rotate Around Normal", "Boolean", 		{}, nil, true, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "StartRotation", 		"Rotation", "Start Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndRotation", 	"Rotation", "Use End Rotation", 	"Boolean", 		{}, nil, false, useConfig);
@@ -368,7 +368,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 				self:AddParticlePropertyRow(worker, particleProps, label, "AxisScaleFunction", 	"Axis", "Function", 				"Combo", 		{}, self.MathFunctionsConversionTable, "Sine", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "StartAxisScale", 	"Axis", "Start Axis Scaling", 		"Generic", 		{}, nil, "[1 1 1]", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndAxisScale", 	"Axis", "Use End Axis Scaling",		"Boolean", 		{}, nil, false, useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "EndAxisScale", 		"Axis", "End Axis Scaling", 		"Generic", 		{}, nil, "[0 0 0]", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "EndAxisScale", 		"Axis", "End Axis Scaling", 		"Generic", 		{}, nil, "[1 1 1]", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "AxisScaleFunctionMod","Axis","Axis Scale Rate", 			"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 end
 

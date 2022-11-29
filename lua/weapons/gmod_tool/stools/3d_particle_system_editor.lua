@@ -112,7 +112,7 @@ function TOOL:Think()
 	end
 end
 
-function TOOL.BuildCPanel(panel, worker, config)
+function TOOL.BuildCPanel(panel, worker, config, name)
 
 	-- Wait for weapon to be initialized before creating the panel.
 	if (worker == nil) then return; end
@@ -141,6 +141,10 @@ function TOOL.BuildCPanel(panel, worker, config)
 		local configEntry = vgui.Create("DTextEntry", configCategory);
 		configEntry:SetValue("New System");
 		configEntry:Dock(TOP);
+
+		if (name != nil) then
+			configEntry:SetValue(name);
+		end
 
 		-- Save particle system button.
 		local browser = nil;
@@ -198,7 +202,7 @@ function TOOL.BuildCPanel(panel, worker, config)
 				local tool = worker:GetOwner():GetTool();
 				local state = file.Read(string.Replace(filePath, "data/", ""));
 				panel:ClearControls();
-				tool.BuildCPanel(panel, worker, state);
+				tool.BuildCPanel(panel, worker, state, string.Replace(string.match(filePath, "[^/]+$"), ".json", ""));
 				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Loaded " .. filePath);
 			end
 		end
