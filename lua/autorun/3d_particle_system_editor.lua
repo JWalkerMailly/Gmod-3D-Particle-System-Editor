@@ -316,7 +316,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 
 				-- Rendering properties.
 				local model = "models/hunter/misc/sphere075x075.mdl";
-				local material = "models/props_combine/portalball001_sheet";
+				local material = "Models/effects/comball_sphere";
 				self:AddParticlePropertyRow(worker, particleProps, label, "Model", 				"Rendering", "Model", 				"Generic", 		{}, nil, model, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "Skin", 				"Rendering", "Skin", 				"Int", 			{ min = 0, max = 100 }, nil, 0, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "BodyGroups", 		"Rendering", "Body Groups", 		"Generic", 		{}, nil, "0", useConfig);
