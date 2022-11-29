@@ -107,7 +107,7 @@ function TOOL:Think()
 	-- Particle system emitter not initialized yet, create it and keep a reference for networking.
 	if (SERVER && (system == NULL || system == nil || !system:IsValid())) then
 
-		local emitter = ents.Create("3d_particle_system");
+		local emitter = ents.Create("3d_particle_system_base");
 		emitter:SetLifeTime(60 * 60)
 		emitter:SetPos(Vector(0, 0, 0));
 		emitter:Spawn();
@@ -116,7 +116,7 @@ function TOOL:Think()
 	end
 end
 
-function TOOL.BuildCPanel(panel, worker, config, name, path)
+function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 
 	-- Wait for weapon to be initialized before creating the panel.
 	if (worker == nil) then return; end
@@ -148,7 +148,7 @@ function TOOL.BuildCPanel(panel, worker, config, name, path)
 
 		-- Config filepath input.
 		local label = vgui.Create("DLabel", configCategory);
-		label:SetText(path || "");
+		label:SetText(configpath || "");
 		label:SetHeight(0);
 		label:SetAlpha(0);
 		label:Dock(TOP);
