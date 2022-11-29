@@ -122,13 +122,6 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 	if (worker == nil) then return; end
 	local tool = worker:GetOwner():GetTool();
 
-	-- Save particle system button.
-	local newSystem = panel:Button("New Particle System");
-	function newSystem:DoClick()
-		panel:ClearControls();
-		tool.BuildCPanel(panel, worker, "", nil, nil);
-	end
-
 	-- New particle text input.
 	local entry = vgui.Create("DTextEntry");
 	entry:SetValue("New Particle");
