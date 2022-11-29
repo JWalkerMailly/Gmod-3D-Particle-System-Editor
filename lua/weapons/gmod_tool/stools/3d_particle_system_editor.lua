@@ -116,7 +116,7 @@ function TOOL:Think()
 	end
 end
 
-function TOOL.BuildCPanel(panel, worker, config, name)
+function TOOL.BuildCPanel(panel, worker, config, name, path)
 
 	-- Wait for weapon to be initialized before creating the panel.
 	if (worker == nil) then return; end
@@ -143,12 +143,15 @@ function TOOL.BuildCPanel(panel, worker, config, name)
 
 		-- Config filename input.
 		local configEntry = vgui.Create("DTextEntry", configCategory);
-		configEntry:SetValue("New System");
+		configEntry:SetValue(name || "New System");
 		configEntry:Dock(TOP);
 
-		if (name != nil) then
-			configEntry:SetValue(name);
-		end
+		-- Config filepath input.
+		local label = vgui.Create("DLabel", configCategory);
+		label:SetText(path || "");
+		label:SetHeight(0);
+		label:SetAlpha(0);
+		label:Dock(TOP);
 
 		-- Save particle system button.
 		local browser = nil;
@@ -172,12 +175,6 @@ function TOOL.BuildCPanel(panel, worker, config, name)
 		function printConfig:DoClick()
 			print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker));
 		end
-
-		local label = vgui.Create("DLabel", configCategory);
-		label:SetText("");
-		label:SetHeight(0);
-		label:SetAlpha(0);
-		label:Dock(TOP);
 
 		-- Add file browser for configuration support.
 		file.CreateDir("3d_particle_system_editor/");
@@ -206,7 +203,7 @@ function TOOL.BuildCPanel(panel, worker, config, name)
 				local tool = worker:GetOwner():GetTool();
 				local state = file.Read(string.Replace(filePath, "data/", ""));
 				panel:ClearControls();
-				tool.BuildCPanel(panel, worker, state, string.Replace(string.match(filePath, "[^/]+$"), ".json", ""));
+				tool.BuildCPanel(panel, worker, state, string.Replace(string.match(filePath, "[^/]+$"), ".json", ""), filePath);
 				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Loaded " .. filePath);
 			end
 		end

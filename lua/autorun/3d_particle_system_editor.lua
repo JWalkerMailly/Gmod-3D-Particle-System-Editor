@@ -188,11 +188,13 @@ function GLOBALS_3D_PARTICLE_EDITOR:GetPropertyDefault(worker, particle, prop, t
 		if (type == "Generic" || type == "Combo") then
 			return string.sub(property, 2, -2);
 		end
+
+		return property;
 	end
 
 	-- If the property is nil, or we are not using a configuration file,
 	-- this will default to using the supplied fallback value.
-	return property || fallback;
+	return fallback;
 end
 
 function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyRow(worker, panel, particle, prop, category, name, type, settings, choices, default, useConfig)
@@ -309,7 +311,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 
 			-- Particle properties list.
 			local particleProps = vgui.Create("DProperties", container);
-			particleProps:SetHeight(1010);
+			particleProps:SetHeight(990);
 			particleProps:Dock(TOP);
 
 				-- Rendering properties.
