@@ -139,8 +139,8 @@ function GLOBALS_3D_PARTICLE_EDITOR:ParseConfiguration(config)
 		if (!v.UseEndRotation) 	then v.EndRotation 	= nil; end
 		if (!v.UseEndColor) 	then v.EndColor 	= nil; end
 		if (!v.UseEndAlpha) 	then v.EndAlpha 	= nil; end
-		if (!v.UseScaleAxis) 	then v.ScaleAxis 	= Vector(0, 0, 0); end
 		if (!v.UseEndScale) 	then v.EndScale 	= nil; end
+		if (!v.UseEndAxisScale) then v.EndAxisScale = nil; end
 		if (v.Material != "")	then v.Material 	= Material(v.Material);
 		else 						 v.Material 	= nil; end
 
@@ -149,6 +149,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:ParseConfiguration(config)
 		v.ColorFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.ColorFunction];
 		v.AlphaFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.AlphaFunction];
 		v.ScaleFunction 	= GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.ScaleFunction];
+		v.AxisScaleFunction = GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable[v.AxisScaleFunction];
 	end
 
 	return particles;
@@ -309,7 +310,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 
 			-- Particle properties list.
 			local particleProps = vgui.Create("DProperties", container);
-			particleProps:SetHeight(925);
+			particleProps:SetHeight(1010);
 			particleProps:Dock(TOP);
 
 				-- Rendering properties.
@@ -362,8 +363,13 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndScale", 		"Scale", "Use End Scale", 			"Boolean", 		{}, nil, false, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "EndScale", 			"Scale", "End Scale", 				"Float", 		{ min = 0, max = 360000 }, nil, 0, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "ScaleFunctionMod", 	"Scale", "Scale Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "UseScaleAxis", 		"Scale", "Use Scale Axis", 			"Boolean", 		{}, nil, false, useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "ScaleAxis", 			"Scale", "Scale Axis", 				"Generic", 		{}, nil, "[1 1 1]", useConfig);
+
+				-- Axis scale properties.
+				self:AddParticlePropertyRow(worker, particleProps, label, "AxisScaleFunction", 	"Axis", "Function", 				"Combo", 		{}, self.MathFunctionsConversionTable, "Sine", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "StartAxisScale", 	"Axis", "Start Axis Scaling", 		"Generic", 		{}, nil, "[1 1 1]", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndAxisScale", 	"Axis", "Use End Axis Scaling",		"Boolean", 		{}, nil, false, useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "EndAxisScale", 		"Axis", "End Axis Scaling", 		"Generic", 		{}, nil, "[0 0 0]", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "AxisScaleFunctionMod","Axis","Axis Scale Rate", 			"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 end
 
 if (SERVER) then
