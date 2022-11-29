@@ -292,18 +292,6 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 			label:SetText(newKey);
 		end
 
-		-- Remove button.
-		local delete = vgui.Create("DButton", category);
-		delete:SetText("Delete");
-		delete:Dock(TOP);
-		function delete:DoClick()
-
-			-- Delete entries to the particles properties array.
-			local oldKey = label:GetText();
-			worker.Particles[oldKey] = nil;
-			category:Remove();
-		end
-
 		-- Generic panel for layout.
 		local container = vgui.Create("DPanel", category);
 		container:Dock(TOP);
@@ -370,6 +358,18 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndAxisScale", 	"Axis", "Use End Axis Scaling",		"Boolean", 		{}, nil, false, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "EndAxisScale", 		"Axis", "End Axis Scaling", 		"Generic", 		{}, nil, "[1 1 1]", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "AxisScaleFunctionMod","Axis","Axis Scale Rate", 			"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
+
+		-- Remove button.
+		local delete = vgui.Create("DButton", container);
+		delete:SetText("Delete");
+		delete:Dock(TOP);
+		function delete:DoClick()
+
+			-- Delete entries to the particles properties array.
+			local oldKey = label:GetText();
+			worker.Particles[oldKey] = nil;
+			category:Remove();
+		end
 end
 
 if (SERVER) then
