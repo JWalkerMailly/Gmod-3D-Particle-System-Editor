@@ -228,7 +228,7 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 	if (config != nil) then
 
 		-- Deserialize and load particles onto the worker entity for data transfers.
-		local particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(config, worker);
+		local particles = GLOBALS_3D_PARTICLE_PARSER:DeserializeParticles(config, worker);
 
 		-- Use data transfer entity to create and load properties into property panel editor.
 		for k,v in pairs(particles) do
