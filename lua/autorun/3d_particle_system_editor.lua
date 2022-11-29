@@ -195,7 +195,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 				self:AddParticlePropertyRow(worker, particleProps, label, "Looping", 			"Timing", "Looping", 				"Boolean", 		{}, nil, false, useConfig);
 
 				-- Rotation properties.
-				self:AddParticlePropertyRow(worker, particleProps, label, "RotationFunction", 	"Rotation", "Function", 			"Combo", 		{}, self.MathFunctionsConversionTable, "Sine", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "RotationFunction", 	"Rotation", "Function", 			"Combo", 		{}, GLOBALS_3D_PARTICLE_PARSER.MathFunctionsConversionTable, "Sine", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "RotationNormal", 	"Rotation", "Rotation Normal", 		"Generic", 		{}, nil, "[0 0 1]", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "ConstantRotation", 	"Rotation", "Constant Rotation", 	"Boolean", 		{}, nil, true, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "StartRotation", 		"Rotation", "Start Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0, useConfig);
@@ -204,28 +204,28 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 				self:AddParticlePropertyRow(worker, particleProps, label, "RotationFunctionMod","Rotation", "Rotation Rate", 		"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 
 				-- Color properties.
-				self:AddParticlePropertyRow(worker, particleProps, label, "ColorFunction", 		"Color", "Function", 				"Combo", 		{}, self.MathFunctionsConversionTable, "Sine", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "ColorFunction", 		"Color", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_PARSER.MathFunctionsConversionTable, "Sine", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "StartColor", 		"Color", "Start Color", 			"VectorColor", 	{}, nil, Vector(255, 255, 255), useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndColor", 		"Color", "Use End Color", 			"Boolean", 		{}, nil, false, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "EndColor", 			"Color", "End Color", 				"VectorColor", 	{}, nil, Vector(255, 255, 255), useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "ColorFunctionMod", 	"Color", "Color Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 
 				-- Alpha properties.
-				self:AddParticlePropertyRow(worker, particleProps, label, "AlphaFunction", 		"Alpha", "Function", 				"Combo", 		{}, self.MathFunctionsConversionTable, "Sine", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "AlphaFunction", 		"Alpha", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_PARSER.MathFunctionsConversionTable, "Sine", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "StartAlpha", 		"Alpha", "Start Alpha", 			"Float", 		{ min = 0, max = 255 }, nil, 255, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndAlpha", 		"Alpha", "Use End Alpha", 			"Boolean", 		{}, nil, false, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "EndAlpha", 			"Alpha", "End Alpha", 				"Float", 		{ min = 0, max = 255 }, nil, 0, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "AlphaFunctionMod", 	"Alpha", "Alpha Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 
 				-- Scale properties.
-				self:AddParticlePropertyRow(worker, particleProps, label, "ScaleFunction", 		"Scale", "Function", 				"Combo", 		{}, self.MathFunctionsConversionTable, "Sine", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "ScaleFunction", 		"Scale", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_PARSER.MathFunctionsConversionTable, "Sine", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "StartScale", 		"Scale", "Start Scale", 			"Float", 		{ min = 0, max = 360000 }, nil, 1, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndScale", 		"Scale", "Use End Scale", 			"Boolean", 		{}, nil, false, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "EndScale", 			"Scale", "End Scale", 				"Float", 		{ min = 0, max = 360000 }, nil, 0, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "ScaleFunctionMod", 	"Scale", "Scale Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 
 				-- Axis scale properties.
-				self:AddParticlePropertyRow(worker, particleProps, label, "AxisScaleFunction", 	"Axis", "Function", 				"Combo", 		{}, self.MathFunctionsConversionTable, "Sine", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "AxisScaleFunction", 	"Axis", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_PARSER.MathFunctionsConversionTable, "Sine", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "StartAxisScale", 	"Axis", "Start Axis Scaling", 		"Generic", 		{}, nil, "[1 1 1]", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndAxisScale", 	"Axis", "Use End Axis Scaling",		"Boolean", 		{}, nil, false, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "EndAxisScale", 		"Axis", "End Axis Scaling", 		"Generic", 		{}, nil, "[1 1 1]", useConfig);
