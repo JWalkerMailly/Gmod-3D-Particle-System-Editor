@@ -58,7 +58,7 @@ function TOOL:LeftClick(trace)
 		net.WriteEntity(worker:GetNWEntity("System"));
 	net.Broadcast();
 
-	return true;
+	return false;
 end
 
 function TOOL:RightClick(trace)
