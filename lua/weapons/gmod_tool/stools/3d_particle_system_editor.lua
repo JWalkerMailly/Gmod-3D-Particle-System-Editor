@@ -160,10 +160,15 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 		saveConfig:Dock(TOP);
 		function saveConfig:DoClick()
 
+			if (worker.Particles == nil || #worker.Particles <= 0) then
+				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "No particles to save.");
+				return;
+			end
+
 			-- Serialize particle data and write to file. If the file exists, it will be overwritten.
 			-- We also reset the file browser to the current folder, this refreshes the file list.
 			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
-			file.Write("3d_particle_system_editor/" .. configEntry:GetValue() .. ".json", serialize);
+			file.Write(browser:GetCurrentFolder() .. configEntry:GetValue() .. ".json", serialize);
 			browser:SetCurrentFolder(browser:GetCurrentFolder());
 			worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Saved configuration.");
 		end
