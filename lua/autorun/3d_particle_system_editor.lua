@@ -134,7 +134,6 @@ function GLOBALS_3D_PARTICLE_EDITOR:ParseConfiguration(config)
 		-- Since JSON and DPropertyLists can't handle nil or empty values,
 		-- nil states must be handled manually according to the desired behavior.
 		if (v.InheritPos) 		then v.Pos 			= nil; end
-		if (v.InheritAngles) 	then v.Angles		= nil; end
 		if (v.InheritLifeTime) 	then v.LifeTime 	= nil; end
 		if (!v.UseEndRotation) 	then v.EndRotation 	= nil; end
 		if (!v.UseEndColor) 	then v.EndColor 	= nil; end
@@ -324,9 +323,9 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 				-- Transform properties.
 				self:AddParticlePropertyRow(worker, particleProps, label, "InheritPos", 		"Transform", "Inherit Pos", 		"Boolean", 		{}, nil, true, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "Pos", 				"Transform", "Position", 			"Generic", 		{}, nil, "[0 0 0]", useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "LocalPos", 			"Transform", "Local Position", 		"Generic", 		{}, nil, "[0 0 0]", useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "InheritAngles", 		"Transform", "Inherit Angles", 		"Boolean", 		{}, nil, false, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "Angles", 			"Transform", "Angles", 				"Generic", 		{}, nil, "{0 0 0}", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "LocalAngles", 		"Transform", "Local Angles", 		"Generic", 		{}, nil, "{0 0 0}", useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "InheritAngles", 		"Transform", "Inherit System Angles","Boolean",		{}, nil, false, useConfig);
 
 				-- Timing properties.
 				self:AddParticlePropertyRow(worker, particleProps, label, "Delay", 				"Timing", "Delay", 					"Float", 		{ min = 0, max = 60 }, nil, 0, useConfig);
@@ -337,7 +336,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 				-- Rotation properties.
 				self:AddParticlePropertyRow(worker, particleProps, label, "RotationFunction", 	"Rotation", "Function", 			"Combo", 		{}, self.MathFunctionsConversionTable, "Sine", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "RotationNormal", 	"Rotation", "Rotation Normal", 		"Generic", 		{}, nil, "[0 0 1]", useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "RotateAroundNormal", "Rotation", "Rotate Around Normal", "Boolean", 		{}, nil, true, useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "ConstantRotation", 	"Rotation", "Constant Rotation", 	"Boolean", 		{}, nil, true, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "StartRotation", 		"Rotation", "Start Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndRotation", 	"Rotation", "Use End Rotation", 	"Boolean", 		{}, nil, false, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "EndRotation", 		"Rotation", "End Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0, useConfig);

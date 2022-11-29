@@ -26,10 +26,14 @@ end
 
 function TOOL:UpdateParticleSystemPosition(trace)
 
+	-- Align to surface.
+	local impactCross = trace.HitNormal:Angle():Forward():Cross(Vector(0, 0, -1));
+	local impactAngle = impactCross:AngleEx(trace.HitNormal);
+
 	-- Update system's position.
 	local system = self:GetWeapon():GetNWEntity("System");
 	system:SetPos(trace.HitPos);
-	system:SetAngles(Angle(0, 0, 0));
+	system:SetAngles(impactAngle);
 	system:SetParent(nil);
 end
 
