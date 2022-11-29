@@ -151,7 +151,7 @@ function TOOL.BuildCPanel(panel, worker, config)
 			-- Serialize particle data and write to file. If the file exists, it will be overwritten.
 			-- We also reset the file browser to the current folder, this refreshes the file list.
 			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
-			file.Write("3d_particle_system_editor/" .. configEntry:GetValue() .. ".txt", serialize);
+			file.Write("3d_particle_system_editor/" .. configEntry:GetValue() .. ".pcf3d", serialize);
 			browser:SetCurrentFolder(browser:GetCurrentFolder());
 		end
 
