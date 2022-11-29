@@ -324,7 +324,6 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 				self:AddParticlePropertyRow(worker, particleProps, label, "InheritPos", 		"Transform", "Inherit Pos", 		"Boolean", 		{}, nil, true, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "Pos", 				"Transform", "Position", 			"Generic", 		{}, nil, "[0 0 0]", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "Angles", 			"Transform", "Angles", 				"Generic", 		{}, nil, "{0 0 0}", useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "LocalAngles", 		"Transform", "Local Angles", 		"Generic", 		{}, nil, "{0 0 0}", useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "InheritAngles", 		"Transform", "Inherit System Angles","Boolean",		{}, nil, false, useConfig);
 
 				-- Timing properties.
