@@ -29,6 +29,7 @@ function TOOL:UpdateParticleSystemPosition(trace)
 	-- Update system's position.
 	local system = self:GetWeapon():GetNWEntity("System");
 	system:SetPos(trace.HitPos);
+	system:SetAngles(Angle(0, 0, 0));
 	system:SetParent(nil);
 end
 
