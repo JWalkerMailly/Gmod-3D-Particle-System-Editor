@@ -113,7 +113,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(config, worker)
 			if (isnumber(y)) then particles[k][x] = self:ToNumber(y); continue; end
 			if (isangle(y))  then particles[k][x] = self:ToAngle(y); continue; end
 			if (isvector(y)) then particles[k][x] = self:ToVector(y); continue; end
-			if (isbool(y)) then continue; end
+			if (isbool(y)) 	 then continue; end
 			particles[k][x] = self:ToVectorColor(y);
 		end
 	end
