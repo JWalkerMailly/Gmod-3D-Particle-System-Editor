@@ -11,7 +11,7 @@ developer 1
 
 ### Controls
 | Input | Description |
-|--|--|--|
+|--|--|
 | Left click | Play particle system. Requires particles to be inside the system to do anything. |
 | Right click | Move particle system where you are looking at. Will also align the system to the surface. If aimed at an entity, will parent the system to it. |
 | Reload | Will parent the particle system to yourself. You can use the attachment slider in the tool menu to change its position on yourself. You need to reload to apply changes. |
