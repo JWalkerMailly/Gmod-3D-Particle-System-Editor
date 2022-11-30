@@ -116,7 +116,7 @@ It is important to understand the data structure behind the properties in the ed
 ## Using your particles
 Once you have created your particle system, you will be left with a *.json* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc.
 
-### Caching your particle
+### Caching your particle ![Alt text](images/shared.png?raw=true "Shared")
 The .json file acts like a PCF, to add it to the cache, you must call:
 ```
 game.Add3DParticles(particleFile, path = "GAME");
@@ -127,7 +127,7 @@ This line should be called in an autorun script shipping with your addon. The *p
 ```
 The *path* parameter describes where to look. By default, the *GAME* path will be used. You shouldn't need to change that value, but if you need to, refer to this link: https://wiki.facepunch.com/gmod/File_Search_Paths.
 
-### Spawning your particle
+### Spawning your particle ![Alt text](images/server.png?raw=true "Shared")
 A convenience function is included with this framework to easily spawn your particle system. To do so, use:
 ```
 ParticleSystem3D(particleName, position, angles, lifetime, parent = NULL, attach = 0);
