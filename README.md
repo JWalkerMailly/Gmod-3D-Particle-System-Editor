@@ -32,8 +32,8 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 #### Rendering
 | Property | Type | Usage |
 |--|--|--|
-| Model | String | Sets the model of that particle |
-| Skin | Number | Used to change the skin of the model being used for the particle |
+| Model | String | Sets the model of that particle. |
+| Skin | Number | Used to change the skin of the model being used for the particle. |
 | Body Groups | String | Used to change the body groups of the model being used. For more information, see this link: https://wiki.facepunch.com/gmod/Entity:SetBodyGroups |
 | Material | String | Override the model's material with this one. |
 
@@ -110,5 +110,38 @@ It is important to understand the data structure behind the properties in the ed
 | Boolean | No particular rule. |
 | Vector | Vectors must respect the following representation: [# # #]. Numbers must be space separated and surrounded by square brackets.
 | Angle | Angles must respect the following representation: {# # #}. Number must be space separated and surrounded by regular brackets.
-| Color | No particular rule. |
+| Color | Must respect the following representation: # # #. Colors use a [0 - 255] range for each value (rgb). Must be space separated. |
 | Function | No particular rule. |
+
+## Using your particles
+Once you have created your particle system, you will be left with a *.json* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc. This file acts like a PCF, to add the particle to the cache, you need to call:
+```
+game.Add3DParticles(particleFile, path = "GAME");
+```
+The *particleFile* parameter represents the path to your *json* file (relative path). It is strongly advised to place these files inside a *particles* folder. If you are shipping this file with an addon, you should place it here:
+```
+/your_addon/particles/your_system.json
+```
+The *path* parameter describes where to look. By default, the *GAME* path will be used. You shouldn't need to set that value, but if you need to, refer to this link: https://wiki.facepunch.com/gmod/File_Search_Paths.
+
+### Spawning your particle
+A convenience function is included with this framework to easily spawn your particle system. To do so, use:
+```
+ParticleSystem3D(particleName, position, angles, lifetime, parent = NULL, attach = 0);
+```
+You can ignore the *parent* and *attach* parameters if you are not planning on parenting your system. The *particleName* parameter denotes the name of your system (filename without .jons). The *lifetime* parameter is important, it should be longer than any of the particles found inside your system.
+
+## Putting it all together
+If you've placed your particle inside a *particles* folder and have not touched the *path* parameter, your code should look like the following.
+
+Caching your particle system:
+```
+game.Add3DParticles("particles/your_system.json");
+```
+
+Spawning your particle system:
+```
+ParticleSystem3D("your_system", Vector(0, 0, 0), Angle(0, 0, 0), 2.5);
+```
+
+This would spawn the particle system at the map's origin for 2.5 seconds.
