@@ -175,6 +175,24 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 	if (worker == nil) then return; end
 	local tool = worker:GetOwner():GetTool();
 
+	-- Add config section to editor.
+	local systemCategory = vgui.Create("DCollapsibleCategory");
+	systemCategory:SetLabel("System");
+	systemCategory:SetExpanded(false);
+	panel:AddItem(systemCategory);
+
+		-- Print particle button. The particle configuration will be printed to console.
+		local clearConfig = vgui.Create("DButton", systemCategory);
+		clearConfig:SetText("Reset");
+		clearConfig:Dock(TOP);
+		function clearConfig:DoClick()
+			panel:ClearControls();
+			tool.BuildCPanel(panel, worker);
+		end
+
+	-- Adjust parenting attachment slider.
+	panel:AddControl("Slider", { Label = "#tool.3d_particle_system_editor.parent_attachment", Max = 50, Command = "3d_particle_system_editor_parent_attachment" });
+
 	-- New particle text input.
 	local entry = vgui.Create("DTextEntry");
 	entry:SetValue("New Particle");
@@ -186,90 +204,92 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 		GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, entry);
 	end
 
-	-- Adjust parenting attachment slider.
-	panel:AddControl("Slider", { Label = "#tool.3d_particle_system_editor.parent_attachment", Max = 50, Command = "3d_particle_system_editor_parent_attachment" });
-
 	-- Add config section to editor.
 	local configCategory = vgui.Create("DCollapsibleCategory");
 	configCategory:SetLabel("Config");
 	configCategory:SetExpanded(false);
 	panel:AddItem(configCategory);
 
-		-- Config filename input.
-		local configEntry = vgui.Create("DTextEntry", configCategory);
-		configEntry:SetValue(name || "New System");
-		configEntry:Dock(TOP);
+		-- Generic panel for layout.
+		local container = vgui.Create("DPanel", configCategory);
+		container:Dock(TOP);
+		configCategory:SetContents(container);
 
-		-- Config filepath input.
-		local label = vgui.Create("DLabel", configCategory);
-		label:SetText(configpath || "");
-		label:SetHeight(0);
-		label:SetAlpha(0);
-		label:Dock(TOP);
+			-- Config filename input.
+			local configEntry = vgui.Create("DTextEntry", container);
+			configEntry:SetValue(name || "New System");
+			configEntry:Dock(TOP);
 
-		-- Save particle system button.
-		local browser = nil;
-		local saveConfig = vgui.Create("DButton", configCategory);
-		saveConfig:SetText("Save Particle System");
-		saveConfig:Dock(TOP);
-		function saveConfig:DoClick()
+			-- Config filepath input.
+			local label = vgui.Create("DLabel", container);
+			label:SetText(configpath || "");
+			label:SetHeight(0);
+			label:SetAlpha(0);
+			label:Dock(TOP);
 
-			if (worker.Particles == nil || tablelength(worker.Particles) <= 0) then
-				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Nothing to save.");
-				return;
+			-- Save particle system button.
+			local browser = nil;
+			local saveConfig = vgui.Create("DButton", container);
+			saveConfig:SetText("Save Particle System");
+			saveConfig:Dock(TOP);
+			function saveConfig:DoClick()
+
+				if (worker.Particles == nil || tablelength(worker.Particles) <= 0) then
+					worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Nothing to save.");
+					return;
+				end
+
+				-- Serialize particle data and write to file. If the file exists, it will be overwritten.
+				-- We also reset the file browser to the current folder, this refreshes the file list.
+				local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
+				local configFile = string.Replace(browser:GetCurrentFolder() .. "/" .. configEntry:GetValue() .. ".json", "data/", "");
+				file.Write(configFile, serialize);
+				if (!file.Exists(configFile, "DATA")) then
+					worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Error: Configuration could not be saved. To backup, use 'Print Particle System' and copy the result from the console.");
+				else
+					browser:SetCurrentFolder(browser:GetCurrentFolder());
+					worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Saved configuration.");
+				end
 			end
 
-			-- Serialize particle data and write to file. If the file exists, it will be overwritten.
-			-- We also reset the file browser to the current folder, this refreshes the file list.
-			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
-			local configFile = string.Replace(browser:GetCurrentFolder() .. "/" .. configEntry:GetValue() .. ".json", "data/", "");
-			file.Write(configFile, serialize);
-			if (!file.Exists(configFile, "DATA")) then
-				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Error: Configuration could not be saved. To backup, use 'Print Particle System' and copy the result from the console.");
-			else
-				browser:SetCurrentFolder(browser:GetCurrentFolder());
-				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Saved configuration.");
+			-- Print particle button. The particle configuration will be printed to console.
+			local printConfig = vgui.Create("DButton", container);
+			printConfig:SetText("Print Particle System");
+			printConfig:Dock(TOP);
+			function printConfig:DoClick()
+				print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker));
 			end
-		end
 
-		-- Print particle button. The particle configuration will be printed to console.
-		local printConfig = vgui.Create("DButton", configCategory);
-		printConfig:SetText("Print Particle System");
-		printConfig:Dock(TOP);
-		function printConfig:DoClick()
-			print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker));
-		end
-
-		-- Add file browser for configuration support.
-		file.CreateDir("3d_particle_system_editor/");
-		browser = vgui.Create("DFileBrowser", configCategory);
-		browser:Dock(TOP);
-		browser:SetPath("GAME");
-		browser:SetBaseFolder("data");
-		browser:SetOpen(true);
-		browser:SetCurrentFolder("3d_particle_system_editor");
-		browser:SetHeight(300);
-		function browser:OnSelect(path, sender)
-			label:SetText(path);
-			configEntry:SetValue(string.Replace(string.match(path, "[^/]+$"), ".json", ""));
-		end
-
-		-- Load particle configuration button.
-		local loadConfig = vgui.Create("DButton", configCategory);
-		loadConfig:SetText("Load Config");
-		loadConfig:Dock(TOP);
-		function loadConfig:DoClick()
-
-			local filePath = label:GetText();
-			if (filePath != nil && filePath != "") then
-
-				-- Call to BuildCPanel to load the configuration.
-				local state = file.Read(string.Replace(filePath, "data/", ""));
-				panel:ClearControls();
-				tool.BuildCPanel(panel, worker, state, string.Replace(string.match(filePath, "[^/]+$"), ".json", ""), filePath);
-				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Loaded " .. filePath);
+			-- Add file browser for configuration support.
+			file.CreateDir("3d_particle_system_editor/");
+			browser = vgui.Create("DFileBrowser", container);
+			browser:Dock(TOP);
+			browser:SetPath("GAME");
+			browser:SetBaseFolder("data");
+			browser:SetOpen(true);
+			browser:SetCurrentFolder("3d_particle_system_editor");
+			browser:SetHeight(300);
+			function browser:OnSelect(path, sender)
+				label:SetText(path);
+				configEntry:SetValue(string.Replace(string.match(path, "[^/]+$"), ".json", ""));
 			end
-		end
+
+			-- Load particle configuration button.
+			local loadConfig = vgui.Create("DButton", container);
+			loadConfig:SetText("Load Config");
+			loadConfig:Dock(TOP);
+			function loadConfig:DoClick()
+
+				local filePath = label:GetText();
+				if (filePath != nil && filePath != "") then
+
+					-- Call to BuildCPanel to load the configuration.
+					local state = file.Read(string.Replace(filePath, "data/", ""));
+					panel:ClearControls();
+					tool.BuildCPanel(panel, worker, state, string.Replace(string.match(filePath, "[^/]+$"), ".json", ""), filePath);
+					worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Loaded " .. filePath);
+				end
+			end
 
 	-- Load configuration file if provided.
 	if (config != nil) then
