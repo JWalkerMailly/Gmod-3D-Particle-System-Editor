@@ -12,6 +12,8 @@ function GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker)
 	local data = "{";
 	for k,v in pairs(worker.Particles) do
 
+		if (!v["Enable"]) then continue; end
+
 		data = data .. "\"" .. k .. "\":{";
 		for x,y in pairs(worker.Particles[k]) do
 			data = data .. "\"" .. x .. "\":" .. tostring(y) .. ",";
@@ -177,6 +179,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 				-- Rendering properties.
 				local model = "models/hunter/misc/sphere075x075.mdl";
 				local material = "Models/effects/comball_sphere";
+				self:AddParticlePropertyRow(worker, particleProps, label, "Enable", 			"Rendering", "Enable", 				"Boolean", 		{}, nil, true, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "Model", 				"Rendering", "Model", 				"Generic", 		{}, nil, model, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "Skin", 				"Rendering", "Skin", 				"Int", 			{ min = 0, max = 100 }, nil, 0, useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "BodyGroups", 		"Rendering", "Body Groups", 		"Generic", 		{}, nil, "0", useConfig);
