@@ -4,7 +4,7 @@ GLOBALS_3D_PARTICLE_EDITOR = {};
 
 -- Used to parse colors.
 function GLOBALS_3D_PARTICLE_EDITOR:ToColor(data)
-	return "{\"r\":" .. data[1] .. ",\"g\":" .. data[2] .. ",\"b\":" .. data[3] .. ",\"a\":255}";
+	return "{\"r\":" .. math.floor(data.r) .. ",\"g\":" .. math.floor(data.g) .. ",\"b\":" .. math.floor(data.b) .. "}";
 end
 
 function GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker)
@@ -30,7 +30,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:SetParticlePropertyValue(worker, particle, p
 
 	-- Vector color is a special case. We handle JSON serialization manually since its data
 	-- structure is unique and differs from vectors and angles.
-	if (type == "VectorColor") then
+	if (type == "Color") then
 		worker.Particles[particle:GetText()][prop] = GLOBALS_3D_PARTICLE_EDITOR:ToColor(value);
 		return;
 	end
@@ -51,9 +51,9 @@ function GLOBALS_3D_PARTICLE_EDITOR:GetPropertyDefault(worker, particle, prop, t
 	if (property != nil) then
 
 		-- Convert JSON color datatype to a lua Vector datatype.
-		if (type == "VectorColor") then
+		if (type == "Color") then
 			local color = util.JSONToTable(property);
-			return Vector(color.r, color.g, color.b);
+			return Color(color.r, color.g, color.b);
 		end
 
 		-- Remove surrounding quotes from JSON string datatype (""example"") for lua string datatype ("example"). 
@@ -91,9 +91,9 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyRow(worker, panel, partic
 		end
 
 		-- Convert Source color datatype to a lua Vector datatype.
-		if (type == "VectorColor") then
+		if (type == "Color") then
 			local color = string.Split(val, " ");
-			self:SetParticlePropertyValue(worker, particle, prop, type, Vector(color[1] * 255, color[2] * 255, color[3] * 255));
+			self:SetParticlePropertyValue(worker, particle, prop, type, Color(tonumber(color[1]) || 0, tonumber(color[2]) || 0, tonumber(color[3]) || 0));
 			return;
 		end
 
@@ -205,9 +205,9 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 
 				-- Color properties.
 				self:AddParticlePropertyRow(worker, particleProps, label, "ColorFunction", 		"Color", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_PARSER.MathFunctionsConversionTable, "Sine", useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "StartColor", 		"Color", "Start Color", 			"VectorColor", 	{}, nil, Vector(255, 255, 255), useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "StartColor", 		"Color", "Start Color", 			"Color", 		{}, nil, Color(255, 255, 255), useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "UseEndColor", 		"Color", "Use End Color", 			"Boolean", 		{}, nil, false, useConfig);
-				self:AddParticlePropertyRow(worker, particleProps, label, "EndColor", 			"Color", "End Color", 				"VectorColor", 	{}, nil, Vector(255, 255, 255), useConfig);
+				self:AddParticlePropertyRow(worker, particleProps, label, "EndColor", 			"Color", "End Color", 				"Color", 		{}, nil, Color(255, 255, 255), useConfig);
 				self:AddParticlePropertyRow(worker, particleProps, label, "ColorFunctionMod", 	"Color", "Color Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
 
 				-- Alpha properties.
