@@ -145,3 +145,6 @@ ParticleSystem3D("your_system", Vector(0, 0, 0), Angle(0, 0, 0), 2.5);
 ```
 
 This would spawn the particle system at the map's origin for 2.5 seconds.
+
+## Disclaimer
+There is **no auto-saving** for this tool, you need to save your work frequently. The editor's lifetime is also dependent on your tool's lifetime, so **if you die while creating a particle system, you risk losing your work** if you have not saved. This tool **may not be compatible for servers**, it was mainly designed for singleplayer use.
