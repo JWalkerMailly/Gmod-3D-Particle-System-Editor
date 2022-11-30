@@ -118,7 +118,7 @@ Once you have created your particle system, you will be left with a *.json* file
 
 ### ![Alt text](images/shared.png?raw=true "Shared")  Caching your particle
 The .json file acts like a PCF, to add it to the cache, you must call:
-```
+```lua
 game.Add3DParticles(particleFile, path = "GAME");
 ```
 This line should be called in an autorun script shipping with your addon. The *particleFile* parameter represents the path to your *json* file (relative path). It is strongly advised to place these files inside a *particles* folder. If you are shipping this file with an addon, you should place it here:
@@ -129,7 +129,7 @@ The *path* parameter describes where to look. By default, the *GAME* path will b
 
 ### ![Alt text](images/server.png?raw=true "Shared")  Spawning your particle
 A convenience function is included with this framework to easily spawn your particle system. To do so, use:
-```
+```lua
 ParticleSystem3D(particleName, position, angles, lifetime, parent = NULL, attach = 0);
 ```
 You can ignore the *parent* and *attach* parameters if you are not planning on parenting your system. The *particleName* parameter denotes the name of your system (filename without .json extension). The *lifetime* parameter is important, it should be longer than any of the particles found inside your system taking into account the delay.
@@ -138,12 +138,12 @@ You can ignore the *parent* and *attach* parameters if you are not planning on p
 If you've placed your system inside a *particles* folder and have not touched the *path* parameter, your code should look like the following.
 
 Caching your particle system:
-```
+```lua
 game.Add3DParticles("particles/your_system.json");
 ```
 
 Spawning your particle system:
-```
+```lua
 ParticleSystem3D("your_system", Vector(0, 0, 0), Angle(0, 0, 0), 2.5);
 ```
 
