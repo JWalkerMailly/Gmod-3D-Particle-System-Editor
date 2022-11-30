@@ -24,6 +24,12 @@ if (CLIENT) then
 	language.Add("tool.3d_particle_system_editor.parent_attachment", "Parent Attachment");
 end
 
+--!
+--! @brief      Sets the particle system's position in the world. Will also align
+--! 			the system's angles to match the surface it is on.
+--!
+--! @param      trace  The tool trace.
+--!	
 function TOOL:UpdateParticleSystemPosition(trace)
 
 	-- Align to surface.
@@ -37,6 +43,12 @@ function TOOL:UpdateParticleSystemPosition(trace)
 	system:SetParent(nil);
 end
 
+--!
+--! @brief      Update the parent of the particle system. Will make use of the attachment 
+--! 			slider found in the tool menu to determine the attach point.
+--!				
+--! @param      parent  The parent.
+--!
 function TOOL:UpdateParticleSystemParent(parent)
 
 	-- If the parent is invalid, do nothing.
@@ -49,6 +61,13 @@ function TOOL:UpdateParticleSystemParent(parent)
 	system:SetParent(parent, self:GetClientNumber("parent_attachment"));
 end
 
+--!
+--! @brief      Left click controls.
+--!
+--! @param      trace  The tool trace.
+--!
+--! @return     False to avoid playing the tool beam effect and animation.
+--!
 function TOOL:LeftClick(trace)
 
 	if (!SERVER) then return; end
@@ -65,6 +84,13 @@ function TOOL:LeftClick(trace)
 	return false;
 end
 
+--!
+--! @brief      Right click controls.
+--!
+--! @param      trace  The tool trace.
+--!
+--! @return     True to play the beam effect and animations.
+--!
 function TOOL:RightClick(trace)
 
 	if (!SERVER) then return; end
@@ -78,6 +104,11 @@ function TOOL:RightClick(trace)
 	return true;
 end
 
+--!
+--! @brief      Reload controls. This will parent the particle system to the owner.
+--!
+--! @return     False to avoid playing the beam effect and animations.
+--!
 function TOOL:Reload()
 
 	if (!SERVER) then return; end
@@ -85,9 +116,16 @@ function TOOL:Reload()
 	-- Begin network call to particle system.
 	self:UpdateParticleSystemParent(self:GetOwner());
 	self:LeftClick(trace);
-	return true;
+	return false;
 end
 
+--!
+--! @brief      Editor and data transfer lifetime. If the datatransfer worker (weapon) is valid
+--!				we create the tool panel to start creating particle systems. If the particle
+--!				system ever dies (default lifetime of 1 hour), we recreate it. 
+--!
+--! @return     { description_of_the_return_value }
+--!
 function TOOL:Think()
 
 	local worker = self:GetWeapon();
@@ -116,6 +154,15 @@ function TOOL:Think()
 	end
 end
 
+--!
+--! @brief      Builds a control panel.
+--!
+--! @param      panel       The panel that was built.
+--! @param      worker      The datatransfer worker. This will be the tool's weapon entity.
+--! @param      config      The configuration file, if provided.
+--! @param      name        The name of the system being edited, if provided.
+--! @param      configpath  The path from which the config was loaded.
+--!
 function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 
 	local function tablelength(T)
@@ -238,6 +285,9 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 	end
 end
 
+--!
+--! @brief      Debug HUD to show where the particle system is in the world.
+--!
 function TOOL:DrawHUD()
 
 	local system = self:GetWeapon():GetNWEntity("System");
