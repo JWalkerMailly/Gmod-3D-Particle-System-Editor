@@ -114,7 +114,10 @@ It is important to understand the data structure behind the properties in the ed
 | Function | No particular rule. |
 
 ## Using your particles
-Once you have created your particle system, you will be left with a *.json* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc. This file acts like a PCF, to add the particle to the cache, you need to call:
+Once you have created your particle system, you will be left with a *.json* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc.
+
+### Caching your particle
+The .json file acts like a PCF, to add it to the cache, you must call:
 ```
 game.Add3DParticles(particleFile, path = "GAME");
 ```
