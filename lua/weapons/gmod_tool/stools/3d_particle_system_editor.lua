@@ -26,9 +26,14 @@ end
 
 function TOOL:UpdateParticleSystemPosition(trace)
 
+	-- Align to surface.
+	local impactCross = trace.HitNormal:Angle():Forward():Cross(Vector(0, 0, -1));
+	local impactAngle = impactCross:AngleEx(trace.HitNormal);
+
 	-- Update system's position.
 	local system = self:GetWeapon():GetNWEntity("System");
 	system:SetPos(trace.HitPos);
+	system:SetAngles(impactAngle);
 	system:SetParent(nil);
 end
 
@@ -38,7 +43,7 @@ function TOOL:UpdateParticleSystemParent(parent)
 	if (!parent:IsValid()) then return; end
 	self:GetWeapon():SetNWEntity("Parent", parent);
 
-	-- Parent system the entity.
+	-- Parent system to entity.
 	local system = self:GetWeapon():GetNWEntity("System");
 	system:SetPos(parent:GetPos());
 	system:SetParent(parent, self:GetClientNumber("parent_attachment"));
@@ -48,21 +53,23 @@ function TOOL:LeftClick(trace)
 
 	if (!SERVER) then return; end
 
-	-- Network weapon data to client side to start initializing particles with editor data.
-	local weapon = self:GetWeapon();
+	-- Weapon acts as the worker for data transfer between the system and the editor.
+	-- This could be any entity but since we are using a tool, it makes sense to use
+	-- the weapon reference of that tool for the duration of the editor's lifetime.
+	local worker = self:GetWeapon();
 	net.Start("3d_particle_system_upload_config");
-		net.WriteEntity(weapon)
-		net.WriteEntity(weapon:GetNWEntity("System"));
+		net.WriteEntity(worker)
+		net.WriteEntity(worker:GetNWEntity("System"));
 	net.Broadcast();
 
-	return true;
+	return false;
 end
 
 function TOOL:RightClick(trace)
 
 	if (!SERVER) then return; end
 
-	-- Delegate positioning anf parenting to appropriate method.
+	-- Delegate positioning and parenting to appropriate method.
 	if (!trace.HitWorld && trace.Entity != NULL) then self:UpdateParticleSystemParent(trace.Entity);
 	else self:UpdateParticleSystemPosition(trace); end
 
@@ -83,251 +90,56 @@ end
 
 function TOOL:Think()
 
-	local weapon = self:GetWeapon();
-	local system = weapon:GetNWEntity("System");
+	local worker = self:GetWeapon();
+	local system = worker:GetNWEntity("System");
 
 	-- Initialize control panel once the weapon entity is valid since we will be using it client side
 	-- for networking the editor data to the particle system.
-	if (CLIENT && !self.PanelInitialized && weapon != NULL && weapon != nil && weapon:IsValid()) then
+	if (CLIENT && !self.PanelInitialized && worker != NULL && worker != nil && worker:IsValid()) then
 
 		local panel = controlpanel.Get("3d_particle_system_editor");
 		panel:ClearControls();
 
-		self.BuildCPanel(panel, weapon);
+		self.BuildCPanel(panel, worker);
 		self.PanelInitialized = true;
 	end
 
 	-- Particle system emitter not initialized yet, create it and keep a reference for networking.
 	if (SERVER && (system == NULL || system == nil || !system:IsValid())) then
 
-		local emitter = ents.Create("3d_particle_system");
+		local emitter = ents.Create("3d_particle_system_base");
 		emitter:SetLifeTime(60 * 60)
 		emitter:SetPos(Vector(0, 0, 0));
 		emitter:Spawn();
 
-		weapon:SetNWEntity("System", emitter);
+		worker:SetNWEntity("System", emitter);
 	end
 end
 
-local function SetParticlePropertyValue(weapon, particle, prop, type, value)
+function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 
-	-- Vector color is a special case. We handle JSON serialization manually since its data
-	-- structure is unique and differs from vectors and angles.
-	if (type == "VectorColor") then
-		weapon.Particles[particle:GetText()][prop] = GLOBALS_3D_PARTICLE_EDITOR:ToColor(value);
-		return;
+	local function tablelength(T)
+		local count = 0;
+		for _ in pairs(T) do count = count + 1; end
+		return count;
 	end
-
-	if (type == "Generic" || type == "Combo") then
-		weapon.Particles[particle:GetText()][prop] = GLOBALS_3D_PARTICLE_EDITOR:ToGeneric(value);
-		return;
-	end
-
-	weapon.Particles[particle:GetText()][prop] = value;
-end
-
-local function GetPropertyDefault(weapon, particle, prop, type, fallback)
-
-	local property = weapon.Particles[particle:GetText()][prop];
-	if (property != nil) then
-
-		if (type == "VectorColor") then
-			local color = util.JSONToTable(property);
-			return Vector(color.r, color.g, color.b);
-		end
-
-		if (type == "Generic" || type == "Combo") then
-			return string.sub(property, 2, -2);
-		end
-	end
-
-	return property || fallback;
-end
-
-local function AddParticlePropertyPanel(weapon, panel, particle, prop, category, name, type, settings, choices, default, useConfig)
-
-	-- Create property editor.
-	local defaultValue = GetPropertyDefault(weapon, particle, prop, type, default);
-
-	if (!useConfig) then
-		SetParticlePropertyValue(weapon, particle, prop, type, defaultValue);
-	end
-
-	local editor = panel:CreateRow(category, name);
-	editor:Setup(type, settings);
-	editor.DataChanged = function(_, val)
-
-		if (type == "Boolean") then
-			if (val == 1) then SetParticlePropertyValue(weapon, particle, prop, type, true);
-			else SetParticlePropertyValue(weapon, particle, prop, type, false); end
-			return;
-		end
-
-		if (type == "VectorColor") then
-			local color = string.Split(val, " ");
-			SetParticlePropertyValue(weapon, particle, prop, type, Vector(color[1] * 255, color[2] * 255, color[3] * 255));
-			return;
-		end
-
-		SetParticlePropertyValue(weapon, particle, prop, type, val);
-	end
-
-	-- Choices are used by Combo boxes.
-	if (choices != nil) then
-		for k,v in pairs(choices) do
-			editor:AddChoice(k, k);
-		end
-	end
-
-	-- Set default value after initialization.
-	if (defaultValue != nil) then editor:SetValue(defaultValue); end
-end
-
-local function AddParticlePanel(weapon, panel, entry, useConfig)
-
-	-- Do nothing if the particle we are trying to create already exists.
-	local particleName = entry:GetValue();
-	if (weapon.Particles[particleName] != nil && !useConfig) then
-		return;
-	end
-
-	-- Initialize particle array for editor key values.
-	if (!useConfig) then
-		weapon.Particles[particleName] = {};
-	end
-
-	-- Particle collapsible category.
-	local category = vgui.Create("DCollapsibleCategory");
-	category:SetLabel(entry:GetValue());
-	category:SetExpanded(false);
-	panel:AddItem(category);
-
-		-- Generic label. This will be hidden an contain the key of the particle.
-		-- The instance will be used as a pass by reference pointer when renaming
-		-- particles in the system using the editor.
-		local label = vgui.Create("DLabel", category);
-		label:SetText(particleName);
-		label:SetHeight(0);
-		label:SetAlpha(0);
-		label:Dock(TOP);
-
-		-- Rename button.
-		local renameButton = vgui.Create("DButton", category);
-		renameButton:SetText("Rename");
-		renameButton:Dock(TOP);
-		function renameButton:DoClick()
-
-			local newKey = entry:GetValue();
-			if (weapon.Particles[newKey] != nil) then
-				return;
-			end
-
-			-- Copy data over and delete old key references.
-			local oldKey = label:GetText();
-			weapon.Particles[newKey] = weapon.Particles[oldKey];
-			weapon.Particles[oldKey] = nil;
-			category:SetLabel(newKey);
-			label:SetText(newKey);
-		end
-
-		-- Remove button.
-		local deleteButton = vgui.Create("DButton", category);
-		deleteButton:SetText("Delete");
-		deleteButton:Dock(TOP);
-		function deleteButton:DoClick()
-
-			-- Delete entries to the particles properties array.
-			local oldKey = label:GetText();
-			weapon.Particles[oldKey] = nil;
-			category:Remove();
-		end
-
-		-- Generic panel for layout.
-		local container = vgui.Create("DPanel", category);
-		container:Dock(TOP);
-		category:SetContents(container);
-
-			-- Particle properties list.
-			local particleProps = vgui.Create("DProperties", container);
-			particleProps:SetHeight(905);
-			particleProps:Dock(TOP);
-
-				-- Rendering properties.
-				local model = "models/hunter/misc/sphere075x075.mdl";
-				local material = "models/props_combine/portalball001_sheet";
-				AddParticlePropertyPanel(weapon, particleProps, label, "Model", 				"Rendering", "Model", 				"Generic", 		{}, nil, model, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "Skin", 					"Rendering", "Skin", 				"Int", 			{ min = 0, max = 100 }, nil, 0, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "BodyGroups", 			"Rendering", "Body Groups", 		"Generic", 		{}, nil, "0", useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "Material", 				"Rendering", "Material", 			"Generic", 		{}, nil, material, useConfig);
-
-				-- Transform properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "InheritPos", 			"Transform", "Inherit Pos", 		"Boolean", 		{}, nil, true, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "Pos", 					"Transform", "Position", 			"Generic", 		{}, nil, "[0 0 0]", useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "LocalPos", 				"Transform", "Local Position", 		"Generic", 		{}, nil, "[0 0 0]", useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "InheritAngles", 		"Transform", "Inherit Angles", 		"Boolean", 		{}, nil, false, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "Angles", 				"Transform", "Angles", 				"Generic", 		{}, nil, "{0 0 0}", useConfig);
-
-				-- Timing properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "Delay", 				"Timing", "Delay", 					"Float", 		{ min = 0, max = 60 }, nil, 0, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "InheritLifeTime", 		"Timing", "Inherit Life Time", 		"Boolean", 		{}, nil, false, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "LifeTime", 				"Timing", "Life Time", 				"Float", 		{ min = 0, max = 60 * 5 }, nil, 1, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "Looping", 				"Timing", "Looping", 				"Boolean", 		{}, nil, false, useConfig);
-
-				-- Rotation properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotationFunction", 		"Rotation", "Function", 			"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine", useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotationNormal", 		"Rotation", "Rotation Normal", 		"Generic", 		{}, nil, "[0 0 0]", useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotateAroundNormal", 	"Rotation", "Rotate Around Normal", "Boolean", 		{}, nil, true, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "StartRotation", 		"Rotation", "Start Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndRotation", 		"Rotation", "Use End Rotation", 	"Boolean", 		{}, nil, false, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "EndRotation", 			"Rotation", "End Rotation", 		"Float", 		{ min = -360000, max = 360000 }, nil, 0, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "RotationFunctionMod", 	"Rotation", "Rotation Rate", 		"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
-
-				-- Color properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "ColorFunction", 		"Color", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine", useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "StartColor", 			"Color", "Start Color", 			"VectorColor", 	{}, nil, Vector(255, 255, 255), useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndColor", 			"Color", "Use End Color", 			"Boolean", 		{}, nil, false, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "EndColor", 				"Color", "End Color", 				"VectorColor", 	{}, nil, Vector(255, 255, 255), useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "ColorFunctionMod", 		"Color", "Color Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
-
-				-- Alpha properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "AlphaFunction", 		"Alpha", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine", useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "StartAlpha", 			"Alpha", "Start Alpha", 			"Float", 		{ min = 0, max = 255 }, nil, 255, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndAlpha", 			"Alpha", "Use End Alpha", 			"Boolean", 		{}, nil, false, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "EndAlpha", 				"Alpha", "End Alpha", 				"Float", 		{ min = 0, max = 255 }, nil, 0, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "AlphaFunctionMod", 		"Alpha", "Alpha Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
-
-				-- Scale properties.
-				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleFunction", 		"Scale", "Function", 				"Combo", 		{}, GLOBALS_3D_PARTICLE_EDITOR.MathFunctionsConversionTable, "Sine", useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "StartScale", 			"Scale", "Start Scale", 			"Float", 		{ min = 0, max = 360000 }, nil, 1, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseEndScale", 			"Scale", "Use End Scale", 			"Boolean", 		{}, nil, false, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "EndScale", 				"Scale", "End Scale", 				"Float", 		{ min = 0, max = 360000 }, nil, 0, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleFunctionMod", 		"Scale", "Scale Rate", 				"Float", 		{ min = -360000, max = 360000 }, nil, 1, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "UseScaleAxis", 			"Scale", "Use Scale Axis", 			"Boolean", 		{}, nil, false, useConfig);
-				AddParticlePropertyPanel(weapon, particleProps, label, "ScaleAxis", 			"Scale", "Scale Axis", 				"Generic", 		{}, nil, "[1 1 1]", useConfig);
-end
-
-function TOOL.BuildCPanel(panel, weapon, config)
 
 	-- Wait for weapon to be initialized before creating the panel.
-	if (weapon == nil) then return; end
-
-	-- Prepare weapon to hold client side references.
-	if (weapon.Particles == nil) then
-		weapon.Particles = {};
-	end
+	if (worker == nil) then return; end
+	local tool = worker:GetOwner():GetTool();
 
 	-- New particle text input.
 	local entry = vgui.Create("DTextEntry");
-	entry:SetValue("Particle 1");
+	entry:SetValue("New Particle");
 	panel:AddItem(entry);
 
 	-- Add particle button.
 	local add = panel:Button("Add Particle");
 	function add:DoClick()
-		AddParticlePanel(weapon, panel, entry);
+		GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, entry);
 	end
 
-	-- Adjust parenting attachment.
+	-- Adjust parenting attachment slider.
 	panel:AddControl("Slider", { Label = "#tool.3d_particle_system_editor.parent_attachment", Max = 50, Command = "3d_particle_system_editor_parent_attachment" });
 
 	-- Add config section to editor.
@@ -338,8 +150,15 @@ function TOOL.BuildCPanel(panel, weapon, config)
 
 		-- Config filename input.
 		local configEntry = vgui.Create("DTextEntry", configCategory);
-		configEntry:SetValue("System 1");
+		configEntry:SetValue(name || "New System");
 		configEntry:Dock(TOP);
+
+		-- Config filepath input.
+		local label = vgui.Create("DLabel", configCategory);
+		label:SetText(configpath || "");
+		label:SetHeight(0);
+		label:SetAlpha(0);
+		label:Dock(TOP);
 
 		-- Save particle system button.
 		local browser = nil;
@@ -348,25 +167,31 @@ function TOOL.BuildCPanel(panel, weapon, config)
 		saveConfig:Dock(TOP);
 		function saveConfig:DoClick()
 
-			-- Seralize particle data and srite to file.
-			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon);
-			file.Write("3d_particle_system_editor/" .. configEntry:GetValue() .. ".txt", serialize);
-			browser:SetCurrentFolder("3d_particle_system_editor");
+			if (worker.Particles == nil || tablelength(worker.Particles) <= 0) then
+				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Nothing to save.");
+				return;
+			end
+
+			-- Serialize particle data and write to file. If the file exists, it will be overwritten.
+			-- We also reset the file browser to the current folder, this refreshes the file list.
+			local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
+			local configFile = string.Replace(browser:GetCurrentFolder() .. "/" .. configEntry:GetValue() .. ".json", "data/", "");
+			file.Write(configFile, serialize);
+			if (!file.Exists(configFile, "DATA")) then
+				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Error: Configuration could not be saved. To backup, use 'Print Particle System' and copy the result from the console.");
+			else
+				browser:SetCurrentFolder(browser:GetCurrentFolder());
+				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Saved configuration.");
+			end
 		end
 
-		-- Print particle button.
+		-- Print particle button. The particle configuration will be printed to console.
 		local printConfig = vgui.Create("DButton", configCategory);
 		printConfig:SetText("Print Particle System");
 		printConfig:Dock(TOP);
 		function printConfig:DoClick()
-			print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(weapon));
+			print(GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker));
 		end
-
-		local label = vgui.Create("DLabel", configCategory);
-		label:SetText("");
-		label:SetHeight(0);
-		label:SetAlpha(0);
-		label:Dock(TOP);
 
 		-- Add file browser for configuration support.
 		file.CreateDir("3d_particle_system_editor/");
@@ -379,9 +204,10 @@ function TOOL.BuildCPanel(panel, weapon, config)
 		browser:SetHeight(300);
 		function browser:OnSelect(path, sender)
 			label:SetText(path);
+			configEntry:SetValue(string.Replace(string.match(path, "[^/]+$"), ".json", ""));
 		end
 
-		-- Print particle button.
+		-- Load particle configuration button.
 		local loadConfig = vgui.Create("DButton", configCategory);
 		loadConfig:SetText("Load Config");
 		loadConfig:Dock(TOP);
@@ -390,19 +216,24 @@ function TOOL.BuildCPanel(panel, weapon, config)
 			local filePath = label:GetText();
 			if (filePath != nil && filePath != "") then
 
-				local tool = weapon:GetOwner():GetTool();
+				-- Call to BuildCPanel to load the configuration.
 				local state = file.Read(string.Replace(filePath, "data/", ""));
 				panel:ClearControls();
-				tool.BuildCPanel(panel, weapon, state);
+				tool.BuildCPanel(panel, worker, state, string.Replace(string.match(filePath, "[^/]+$"), ".json", ""), filePath);
+				worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Loaded " .. filePath);
 			end
 		end
 
 	-- Load configuration file if provided.
-	if (config != nil && config != "") then
-		weapon.Particles = GLOBALS_3D_PARTICLE_EDITOR:DeserializeParticles(config);
-		for k,v in pairs(weapon.Particles) do
+	if (config != nil) then
+
+		-- Deserialize and load particles onto the worker entity for data transfers.
+		local particles = GLOBALS_3D_PARTICLE_PARSER:DeserializeParticles(config, worker);
+
+		-- Use data transfer entity to create and load properties into property panel editor.
+		for k,v in pairs(particles) do
 			entry:SetValue(k);
-			AddParticlePanel(weapon, panel, entry, true);
+			GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, entry, true);
 		end
 	end
 end
@@ -420,7 +251,7 @@ function TOOL:DrawHUD()
 	local right = angles:Right();
 	local forward = angles:Forward();
 
-	-- Debug data if developer is turned on.
+	-- Debug info, to use; type developer 1 in console.
 	debugoverlay.Line(pos, pos + up * 64, FrameTime() * 2, Color(0, 0, 255), true);
 	debugoverlay.Line(pos, pos + right * 64, FrameTime() * 2, Color(255, 0, 0), true);
 	debugoverlay.Line(pos, pos + forward * 64, FrameTime() * 2, Color(0, 255, 0), true);
