@@ -124,8 +124,6 @@ end
 --!				we create the tool panel to start creating particle systems. If the particle
 --!				system ever dies (default lifetime of 1 hour), we recreate it. 
 --!
---! @return     { description_of_the_return_value }
---!
 function TOOL:Think()
 
 	local worker = self:GetWeapon();
@@ -183,7 +181,7 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 	systemCategory:SetExpanded(false);
 	panel:AddItem(systemCategory);
 
-		-- Print particle button. The particle configuration will be printed to console.
+		-- Clear button. The particle system will be reset.
 		local clearConfig = vgui.Create("DButton", systemCategory);
 		clearConfig:SetText("Reset");
 		clearConfig:Dock(TOP);
