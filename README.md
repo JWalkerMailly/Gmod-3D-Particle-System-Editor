@@ -116,7 +116,7 @@ It is important to understand the data structure behind the properties in the ed
 ## Using your particles
 Once you have created your particle system, you will be left with a *.json* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc.
 
-### ![Shared](images/shared.png?raw=true "Shared")  Caching your particle
+### ![Shared](images/shared.png?raw=true "Shared")  Caching your particle system
 The .json file acts like a PCF, to add it to the cache, you must call:
 ```lua
 game.Add3DParticles(particleFile, path = "GAME");
@@ -127,7 +127,7 @@ This line should be called in an autorun script shipping with your addon. The *p
 ```
 The *path* parameter describes where to look. By default, the *GAME* path will be used. You shouldn't need to change that value, but if you need to, refer to this link: https://wiki.facepunch.com/gmod/File_Search_Paths.
 
-### ![Server](images/server.png?raw=true "Server")  Spawning your particle
+### ![Server](images/server.png?raw=true "Server")  Spawning your particle system
 A convenience function is included with this framework to easily spawn your particle system. To do so, use:
 ```lua
 ParticleSystem3D(particleName, position, angles, lifetime, parent = NULL, attach = 0);
