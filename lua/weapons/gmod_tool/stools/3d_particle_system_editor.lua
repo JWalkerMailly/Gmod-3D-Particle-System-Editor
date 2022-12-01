@@ -190,6 +190,7 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 		function clearConfig:DoClick()
 			panel:ClearControls();
 			tool.BuildCPanel(panel, worker);
+			worker.Particles = {};
 		end
 
 	-- Adjust parenting attachment slider.
