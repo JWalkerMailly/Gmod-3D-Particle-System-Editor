@@ -1,5 +1,4 @@
 ![Banner](images/banner.png?raw=true "Banner")
-# 3D Particle System Editor
 
 ## Description
 GUI tool to easily create 3D Particle Effects using the 3D Particle System Base. The tool will be found in the 'Effects' category of the spawn menu.
