@@ -116,14 +116,15 @@ It is important to understand the data structure behind the properties in the ed
 | Function | No particular rule. |
 
 ## Using your particles
-Once you have created your particle system, you will be left with a *.lua* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc.
+Once you have created your particle system, you will be left with a *.lua.txt* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc.
+**IMPORTANT:** Due to limitations with the file library, the tool will save your particle system as; your_system.lua.txt. To use your particle system, you **must** remove the *.txt* extension.
 
 ### ![Shared](images/shared.png?raw=true "Shared")  Caching your particle system
 The .lua file acts like a PCF, to add it to the cache, you must call:
 ```lua
 game.Add3DParticles(particleFile, path = "LUA");
 ```
-This line should be called in an autorun script shipping with your addon. The *particleFile* parameter represents the path to your *lua* file (relative path). It is strongly advised to place these files inside a *particles* folder. If you are shipping this file with an addon, you should place it here:
+This line should be called in an autorun script shipping with your addon. The *particleFile* parameter represents the path to your *lua* file (relative path). You must place these files inside a *particles* folder in your lua directory. If you are shipping this file with an addon, you should place it here:
 ```
 /your_addon/lua/particles/your_system.lua
 ```
