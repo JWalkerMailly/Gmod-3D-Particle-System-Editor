@@ -29,7 +29,7 @@ You can save your particle files wherever you like as long as the folder already
 ### Particles
 To add particles to your system, simply press 'Add Particle' and a new category will be appended to the end of your menu. From there you'll be able to modify all the parameters of that particle. Here is a comprehensive list of all the properties:
 
-#### Rendering
+#### ![Render](images/render.png?raw=true "Render")  Rendering
 | Property | Type | Usage |
 |--|--|--|
 | Model | String | Sets the model of that particle. |
@@ -37,7 +37,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | Body Groups | String | Used to change the body groups of the model being used. For more information, see this link: https://wiki.facepunch.com/gmod/Entity:SetBodyGroups |
 | Material | String | Override the model's material with this one. |
 
-#### Transform
+#### ![Transform](images/transform.png?raw=true "Transform")  Transform
 | Property | Type | Usage |
 |--|--|--|
 | Inherit Pos | Boolean | If set to true, will ignore positioning and use the system's position instead. |
@@ -45,7 +45,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | Angles | Angle | The particle's angles. |
 | Inherit System Angles | Boolean | If set to true, will inherit the angles of the system and update all transforms. If set to true while the system has a parent, will transform the particle using the parent's angles. |
 
-#### Timing
+#### ![Timing](images/timing.png?raw=true "Timing")  Timing
 | Property | Type | Usage |
 |--|--|--|
 | Delay | Number | Delay before spawning the particle in the system. |
@@ -53,7 +53,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | Life Time | Number | The lifetime of the particle. |
 | Looping | Boolean | If set to true, the particle's lifetime will reset once it is dead in order to 'loop'. |
 
-#### Rotation
+#### ![Rotation](images/rotation.png?raw=true "Rotation")  Rotation
 | Property | Type | Usage |
 |--|--|--|
 | Function | Combo | The lua function to use to animate the particle's rotation. |
@@ -64,7 +64,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | End Rotation | Number | The desired final rotation angle. |
 | Rotation Rate | Number | Speed modifier for the rotation function. This can also mean the 'domain' of the function. |
 
-#### Color
+#### ![Color](images/color.png?raw=true "Color")  Color
 | Property | Type | Usage |
 |--|--|--|
 | Function | Combo | The lua function to use to animate the particle's color. |
@@ -73,7 +73,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | End Color | Color | The final color of the particle. |
 | Color Rate | Number | Speed modifier for the color function. This can also mean the 'domain' of the function. |
 
-#### Alpha
+#### ![Alpha](images/alpha.png?raw=true "Alpha")  Alpha
 | Property | Type | Usage |
 |--|--|--|
 | Function | Combo | The lua function to use to animate the particle's alpha. |
@@ -82,7 +82,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | End Alpha | Number | The final alpha of the particle. |
 | Alpha Rate | Number | Speed modifier for the alpha function. This can also mean the 'domain' of the function. |
 
-#### Scale
+#### ![Scale](images/size.png?raw=true "Scale")  Scale
 | Property | Type | Usage |
 |--|--|--|
 | Function | Combo | The lua function to use to animate the particle's scale. |
@@ -91,7 +91,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | End Scale | Number | The final scale of the particle. |
 | Scale Rate | Number | Speed modifier for the scale function. This can also mean the 'domain' of the function. |
 
-#### Axis Scale
+#### ![Axis](images/axis.png?raw=true "Axis")  Axis Scale
 | Property | Type | Usage |
 |--|--|--|
 | Function | Combo | The lua function to use to animate the particle's axis scale. |
