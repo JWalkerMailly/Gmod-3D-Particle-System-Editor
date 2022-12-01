@@ -8,6 +8,8 @@ If you are familiar with Source's PCFs, you'll be comfortable with this tool. If
 ```
 developer 1
 ```
+You can also watch a brief demo on youtube:
+https://www.youtube.com/watch?v=h84gh2t2WZo
 
 ### Controls
 | Input | Description |
