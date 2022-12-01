@@ -64,7 +64,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | End Rotation | Number | The desired final rotation angle. |
 | Rotation Rate | Number | Speed modifier for the rotation function. This can also mean the 'domain' of the function. |
 
-#### ![Color](images/color.png?raw=true "Color")  Color
+#### ![Color](images/color.svg?raw=true "Color")  Color
 | Property | Type | Usage |
 |--|--|--|
 | Function | Combo | The lua function to use to animate the particle's color. |
