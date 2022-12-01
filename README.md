@@ -26,6 +26,8 @@ garrysmod/garrysmod/data/3d_particle_system_editor
 ```
 You can save your particle files wherever you like as long as the folder already exists inside the 'data' directory.
 
+**IMPORTANT:** Due to limitations with the file library, the tool will save your particle system as; your_system.lua.txt. To use your particle system, you **must** remove the *.txt* extension.
+
 ### Particles
 To add particles to your system, simply press 'Add Particle' and a new category will be appended to the end of your menu. From there you'll be able to modify all the parameters of that particle. Here is a comprehensive list of all the properties:
 
@@ -119,13 +121,13 @@ Once you have created your particle system, you will be left with a *.lua* file.
 ### ![Shared](images/shared.png?raw=true "Shared")  Caching your particle system
 The .lua file acts like a PCF, to add it to the cache, you must call:
 ```lua
-game.Add3DParticles(particleFile, path = "GAME");
+game.Add3DParticles(particleFile, path = "LUA");
 ```
-This line should be called in an autorun script shipping with your addon. The *particleFile* parameter represents the path to your *json* file (relative path). It is strongly advised to place these files inside a *particles* folder. If you are shipping this file with an addon, you should place it here:
+This line should be called in an autorun script shipping with your addon. The *particleFile* parameter represents the path to your *lua* file (relative path). It is strongly advised to place these files inside a *particles* folder. If you are shipping this file with an addon, you should place it here:
 ```
-/your_addon/particles/your_system.lua
+/your_addon/lua/particles/your_system.lua
 ```
-The *path* parameter describes where to look. By default, the *GAME* path will be used. You shouldn't need to change that value, but if you need to, refer to this link: https://wiki.facepunch.com/gmod/File_Search_Paths.
+The *path* parameter describes where to look. By default, the *LUA* path will be used. You shouldn't need to change that value, but if you need to, refer to this link: https://wiki.facepunch.com/gmod/File_Search_Paths.
 
 ### ![Server](images/server.png?raw=true "Server")  Spawning your particle system
 A convenience function is included with this framework to easily spawn your particle system. To do so, use:
