@@ -130,10 +130,12 @@ function TOOL:Think()
 
 	local worker = self:GetWeapon();
 	local system = worker:GetNWEntity("System");
+	local workerValid = worker != NULL && worker != nil && worker:IsValid();
+	local systemValid = system != NULL && system != nil && system:IsValid();
 
 	-- Initialize control panel once the weapon entity is valid since we will be using it client side
 	-- for networking the editor data to the particle system.
-	if (CLIENT && !self.PanelInitialized && worker != NULL && worker != nil && worker:IsValid()) then
+	if (CLIENT && !self.PanelInitialized && workerValid) then
 
 		local panel = controlpanel.Get("3d_particle_system_editor");
 		panel:ClearControls();
@@ -143,7 +145,7 @@ function TOOL:Think()
 	end
 
 	-- Particle system emitter not initialized yet, create it and keep a reference for networking.
-	if (SERVER && (system == NULL || system == nil || !system:IsValid())) then
+	if (SERVER && !systemValid) then
 
 		local emitter = ents.Create("3d_particle_system_base");
 		emitter:SetLifeTime(60 * 60)
@@ -151,6 +153,12 @@ function TOOL:Think()
 		emitter:Spawn();
 
 		worker:SetNWEntity("System", emitter);
+	end
+
+	-- Auto save feature.
+	if (workerValid && systemValid && CurTime() > (self.LastAutoSave || 0)) then
+		GLOBALS_3D_PARTICLE_EDITOR:Save(worker, "autosave", "data/3d_particle_system_editor", true);
+		self.LastAutoSave = CurTime() + 30;
 	end
 end
 
@@ -164,12 +172,6 @@ end
 --! @param      configpath  The path from which the config was loaded.
 --!
 function TOOL.BuildCPanel(panel, worker, config, name, configpath)
-
-	local function tablelength(T)
-		local count = 0;
-		for _ in pairs(T) do count = count + 1; end
-		return count;
-	end
 
 	-- Wait for weapon to be initialized before creating the panel.
 	if (worker == nil) then return; end
@@ -233,22 +235,8 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 			saveConfig:SetText("Save Particle System");
 			saveConfig:Dock(TOP);
 			function saveConfig:DoClick()
-
-				if (worker.Particles == nil || tablelength(worker.Particles) <= 0) then
-					worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Nothing to save.");
-					return;
-				end
-
-				-- Serialize particle data and write to file. If the file exists, it will be overwritten.
-				-- We also reset the file browser to the current folder, this refreshes the file list.
-				local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
-				local configFile = string.Replace(browser:GetCurrentFolder() .. "/" .. configEntry:GetValue() .. ".json", "data/", "");
-				file.Write(configFile, serialize);
-				if (!file.Exists(configFile, "DATA")) then
-					worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Error: Configuration could not be saved. To backup, use 'Print Particle System' and copy the result from the console.");
-				else
+				if (GLOBALS_3D_PARTICLE_EDITOR:Save(worker, configEntry:GetValue(), browser:GetCurrentFolder())) then
 					browser:SetCurrentFolder(browser:GetCurrentFolder());
-					worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Saved configuration.");
 				end
 			end
 

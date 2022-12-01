@@ -247,6 +247,32 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 		end
 end
 
+function GLOBALS_3D_PARTICLE_EDITOR:Save(worker, name, path, silent)
+
+	local function tablelength(T)
+		local count = 0;
+		for _ in pairs(T) do count = count + 1; end
+		return count;
+	end
+
+	if (worker.Particles == nil || tablelength(worker.Particles) <= 0) then
+		if (!silent) then worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Nothing to save."); end
+		return;
+	end
+
+	-- Serialize particle data and write to file. If the file exists, it will be overwritten.
+	local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
+	local configFile = string.Replace(path .. "/" .. name .. ".json", "data/", "");
+	file.Write(configFile, serialize);
+	if (!file.Exists(configFile, "DATA")) then
+		if (!silent) then worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Error: Configuration could not be saved. To backup, use 'Print Particle System' and copy the result from the console."); end
+		return false;
+	else
+		if (!silent) then worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Saved configuration."); end
+		return true;
+	end
+end
+
 if (SERVER) then
 	util.AddNetworkString("3d_particle_system_upload_config");
 end
