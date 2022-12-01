@@ -64,7 +64,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | End Rotation | Number | The desired final rotation angle. |
 | Rotation Rate | Number | Speed modifier for the rotation function. This can also mean the 'domain' of the function. |
 
-#### Color
+#### ![Color](images/color.png?raw=true "Color")  Color
 | Property | Type | Usage |
 |--|--|--|
 | Function | Combo | The lua function to use to animate the particle's color. |
@@ -116,7 +116,7 @@ It is important to understand the data structure behind the properties in the ed
 ## Using your particles
 Once you have created your particle system, you will be left with a *.json* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc.
 
-### ![Alt text](images/shared.png?raw=true "Shared")  Caching your particle
+### ![Shared](images/shared.png?raw=true "Shared")  Caching your particle
 The .json file acts like a PCF, to add it to the cache, you must call:
 ```lua
 game.Add3DParticles(particleFile, path = "GAME");
@@ -127,7 +127,7 @@ This line should be called in an autorun script shipping with your addon. The *p
 ```
 The *path* parameter describes where to look. By default, the *GAME* path will be used. You shouldn't need to change that value, but if you need to, refer to this link: https://wiki.facepunch.com/gmod/File_Search_Paths.
 
-### ![Alt text](images/server.png?raw=true "Shared")  Spawning your particle
+### ![Server](images/server.png?raw=true "Server")  Spawning your particle
 A convenience function is included with this framework to easily spawn your particle system. To do so, use:
 ```lua
 ParticleSystem3D(particleName, position, angles, lifetime, parent = NULL, attach = 0);
