@@ -113,9 +113,9 @@ It is important to understand the data structure behind the properties in the ed
 | String | No particular rule. |
 | Number | Numeric only. |
 | Boolean | No particular rule. |
-| Vector | Vectors must respect the following representation: [# # #]. Numbers must be space separated and surrounded by square brackets.
-| Angle | Angles must respect the following representation: {# # #}. Number must be space separated and surrounded by regular brackets.
-| Color | Must respect the following representation: # # #. Colors use a [0 - 255] range for each value (rgb). Must be space separated. |
+| Vector | Vectors must respect the following representation: [x y z]. Numbers must be space separated and surrounded by square brackets.
+| Angle | Angles must respect the following representation: {p y r}. Number must be space separated and surrounded by regular brackets.
+| Color | Must respect the following representation: r g b. Colors use a [0 - 255] range for each value. Must be space separated. |
 | Function | No particular rule. |
 
 ## Using your particles
