@@ -91,7 +91,7 @@ To add particles to your system, simply press 'Add Particle' and a new category 
 | End Scale | Number | The final scale of the particle. |
 | Scale Rate | Number | Speed modifier for the scale function. This can also mean the 'domain' of the function. |
 
-#### ![Axis](images/axis.png?raw=true "Axis")  Axis Scale
+#### ![Axis](images/scale.png?raw=true "Axis")  Axis Scale
 | Property | Type | Usage |
 |--|--|--|
 | Function | Combo | The lua function to use to animate the particle's axis scale. |
