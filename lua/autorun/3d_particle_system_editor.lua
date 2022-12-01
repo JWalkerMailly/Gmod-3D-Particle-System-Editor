@@ -173,7 +173,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 
 			-- Particle properties list.
 			local particleProps = vgui.Create("DProperties", container);
-			particleProps:SetHeight(990);
+			particleProps:SetHeight(1010);
 			particleProps:Dock(TOP);
 
 				-- Rendering properties.
