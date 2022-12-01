@@ -1,0 +1,9 @@
+{
+	"title": "3D Particle Effects Editor",
+	"type": "tool",
+	"tags": ["build","scenic"],
+	"ignore":
+	[
+		"*.jpg"
+	]
+}
