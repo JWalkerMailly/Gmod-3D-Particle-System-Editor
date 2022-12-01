@@ -7,6 +7,14 @@ function GLOBALS_3D_PARTICLE_EDITOR:ToColor(data)
 	return "{\"r\":" .. math.floor(data.r) .. ",\"g\":" .. math.floor(data.g) .. ",\"b\":" .. math.floor(data.b) .. "}";
 end
 
+--!
+--! @brief      Serializes the particles on the worker. All the values form the editor are already
+--! 			In JSON format, this function simply constructs the JSON table for the system and particles.
+--!
+--! @param      worker  The worker entity containing the particles.
+--!
+--! @return     Particle system in JSON format.
+--!
 function GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker)
 
 	local data = "{";
@@ -28,6 +36,16 @@ function GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker)
 	return data;
 end
 
+--!
+--! @brief      Loads a value onto the desired property of a particle. This function also converts
+--! 			the value into the the appropriate JSON data structure.
+--!
+--! @param      worker    The worker containing the particle's property to update.
+--! @param      particle  The particle being modified.
+--! @param      prop      The property to update.
+--! @param      type      The data type of that property.
+--! @param      value     The desired value.
+--!
 function GLOBALS_3D_PARTICLE_EDITOR:SetParticlePropertyValue(worker, particle, prop, type, value)
 
 	-- Vector color is a special case. We handle JSON serialization manually since its data
@@ -46,6 +64,20 @@ function GLOBALS_3D_PARTICLE_EDITOR:SetParticlePropertyValue(worker, particle, p
 	worker.Particles[particle:GetText()][prop] = value;
 end
 
+--!
+--! @brief      Will return the desired property from the particle if it exists. If it does not
+--! 			exist, will return the fallback value instead. This is mainly used for setting
+--! 			up the editor when loading a configuration, or when instancing a new editor.
+--!				This function will also convert from JSON to the editor's data type.
+--!
+--! @param      worker    The worker containing the particles.
+--! @param      particle  The particle from which to retreive the property.
+--! @param      prop      The property to return.
+--! @param      type      The type of that property.
+--! @param      fallback  The fallback to use if the property is not set.
+--!
+--! @return     Property default.
+--!
 function GLOBALS_3D_PARTICLE_EDITOR:GetPropertyDefault(worker, particle, prop, type, fallback)
 
 	-- Determine if the worker already contains a configuration file.
@@ -71,6 +103,22 @@ function GLOBALS_3D_PARTICLE_EDITOR:GetPropertyDefault(worker, particle, prop, t
 	return fallback;
 end
 
+--!
+--! @brief      Adds a particle property editable panel to the editor for a particle. For more
+--! 			information on the Derma being created, see: https://wiki.facepunch.com/gmod/DProperties:CreateRow
+--!
+--! @param      worker     The worker containing the particles.
+--! @param      panel      The panel onto which the row will be added, this should be a DProperties component.
+--! @param      particle   The particle for which to add the editor.
+--! @param      prop       The property of the particle for which to add the editor.
+--! @param      category   Grouping parameter for the DProperties.
+--! @param      name       The name of the property in text form.
+--! @param      type       The type of that property.
+--! @param      settings   The settings, if any. This is used to set a 'min' and a 'max' for example.
+--! @param      choices    The choices, only for ComboBoxes.
+--! @param      default    The default value to set on the editor.
+--! @param      useConfig  If set to true, will not update the worker. This is used when first loading a config.
+--!
 function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyRow(worker, panel, particle, prop, category, name, type, settings, choices, default, useConfig)
 
 	-- Get the default value either form the worker, or the fallback. If we are using a configuration
@@ -92,7 +140,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyRow(worker, panel, partic
 			return;
 		end
 
-		-- Convert Source color datatype to a lua Vector datatype.
+		-- Convert Source color datatype to a lua Color datatype.
 		if (type == "Color") then
 			local color = string.Split(val, " ");
 			self:SetParticlePropertyValue(worker, particle, prop, type, Color(tonumber(color[1]) || 0, tonumber(color[2]) || 0, tonumber(color[3]) || 0));
@@ -113,6 +161,18 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyRow(worker, panel, partic
 	if (defaultValue != nil) then editor:SetValue(defaultValue); end
 end
 
+--!
+--! @brief      The meat of the editor. This will create the editor panel with all the properties
+--! 			for an individual particle. This panel is also generic and could theoretically be
+--! 			reused in an Derma component if you desire. To do so, you must have a good grasp
+--! 			on what the worker is.
+--!
+--! @param      worker      The worker entity that will contain the particle for data transfer.
+--! @param      panel       The panel onto which the editor panel will be added.
+--! @param      dtextentry  The dtextentry to use for the name of the particle. This must be the
+--! 						component itself in order to use pass by reference when renaming.
+--! @param      useConfig   If set to true, will prevent updating the the worker with default values.
+--!
 function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtextentry, useConfig)
 
 	-- Prepare worker particles if not already done.
@@ -247,6 +307,16 @@ function GLOBALS_3D_PARTICLE_EDITOR:AddParticlePropertyPanel(worker, panel, dtex
 		end
 end
 
+--!
+--! @brief      Save the worker's particle configuration to a JSON file.
+--!
+--! @param      worker  The worker containing the particle data.
+--! @param      name    The name of the JSON file.
+--! @param      path    The path to use to save the file. Relative to 'DATA' folder.
+--! @param      silent  If set to true, will not print to the player's HUD. Used for auto-save.
+--!
+--! @return     True on success, False on failure.
+--!
 function GLOBALS_3D_PARTICLE_EDITOR:Save(worker, name, path, silent)
 
 	local function tablelength(T)
@@ -273,6 +343,14 @@ function GLOBALS_3D_PARTICLE_EDITOR:Save(worker, name, path, silent)
 	end
 end
 
+--!
+--! Data transfer code. This is the part responsible for converting the data from the editor
+--! into an actual particle in the world. The worker entity should contain an array named
+--! 'Particles' that will get parsed into a Source Engine data structure. The final configuration
+--! will then be loaded into the InitializeParticles function of a 3d_particle_system_base entity.
+--! This code is made specifically for the editor and should not be reused in any projects unless
+--! creating a new editor.
+--!
 if (SERVER) then
 	util.AddNetworkString("3d_particle_system_upload_config");
 end
