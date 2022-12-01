@@ -260,7 +260,7 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 			browser:SetHeight(300);
 			function browser:OnSelect(path, sender)
 				label:SetText(path);
-				configEntry:SetValue(string.Replace(string.match(path, "[^/]+$"), ".json", ""));
+				configEntry:SetValue(string.Replace(string.match(path, "[^/]+$"), ".lua", ""));
 			end
 
 			-- Load particle configuration button.
@@ -275,7 +275,7 @@ function TOOL.BuildCPanel(panel, worker, config, name, configpath)
 					-- Call to BuildCPanel to load the configuration.
 					local state = file.Read(string.Replace(filePath, "data/", ""));
 					panel:ClearControls();
-					tool.BuildCPanel(panel, worker, state, string.Replace(string.match(filePath, "[^/]+$"), ".json", ""), filePath);
+					tool.BuildCPanel(panel, worker, state, string.Replace(string.match(filePath, "[^/]+$"), ".lua", ""), filePath);
 					worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Loaded " .. filePath);
 				end
 			end

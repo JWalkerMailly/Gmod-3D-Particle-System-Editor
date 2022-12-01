@@ -114,16 +114,16 @@ It is important to understand the data structure behind the properties in the ed
 | Function | No particular rule. |
 
 ## Using your particles
-Once you have created your particle system, you will be left with a *.json* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc.
+Once you have created your particle system, you will be left with a *.lua* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc.
 
 ### ![Shared](images/shared.png?raw=true "Shared")  Caching your particle system
-The .json file acts like a PCF, to add it to the cache, you must call:
+The .lua file acts like a PCF, to add it to the cache, you must call:
 ```lua
 game.Add3DParticles(particleFile, path = "GAME");
 ```
 This line should be called in an autorun script shipping with your addon. The *particleFile* parameter represents the path to your *json* file (relative path). It is strongly advised to place these files inside a *particles* folder. If you are shipping this file with an addon, you should place it here:
 ```
-/your_addon/particles/your_system.json
+/your_addon/particles/your_system.lua
 ```
 The *path* parameter describes where to look. By default, the *GAME* path will be used. You shouldn't need to change that value, but if you need to, refer to this link: https://wiki.facepunch.com/gmod/File_Search_Paths.
 
@@ -132,14 +132,14 @@ A convenience function is included with this framework to easily spawn your part
 ```lua
 ParticleSystem3D(particleName, position, angles, lifetime, parent = NULL, attach = 0);
 ```
-You can ignore the *parent* and *attach* parameters if you are not planning on parenting your system. The *particleName* parameter denotes the name of your system (filename without .json extension). The *lifetime* parameter is important, it should be longer than any of the particles found inside your system taking into account the delay.
+You can ignore the *parent* and *attach* parameters if you are not planning on parenting your system. The *particleName* parameter denotes the name of your system (filename without .lua extension). The *lifetime* parameter is important, it should be longer than any of the particles found inside your system taking into account the delay.
 
 ## Putting it all together
 If you've placed your system inside a *particles* folder and have not touched the *path* parameter, your code should look like the following.
 
 Caching your particle system:
 ```lua
-game.Add3DParticles("particles/your_system.json");
+game.Add3DParticles("particles/your_system.lua");
 ```
 
 Spawning your particle system:

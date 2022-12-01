@@ -332,7 +332,7 @@ function GLOBALS_3D_PARTICLE_EDITOR:Save(worker, name, path, silent)
 
 	-- Serialize particle data and write to file. If the file exists, it will be overwritten.
 	local serialize = GLOBALS_3D_PARTICLE_EDITOR:SerializeParticles(worker);
-	local configFile = string.Replace(path .. "/" .. name .. ".json", "data/", "");
+	local configFile = string.Replace(path .. "/" .. name .. ".lua", "data/", "");
 	file.Write(configFile, serialize);
 	if (!file.Exists(configFile, "DATA")) then
 		if (!silent) then worker:GetOwner():PrintMessage(HUD_PRINTTALK, "Error: Configuration could not be saved. To backup, use 'Print Particle System' and copy the result from the console."); end
