@@ -1,3 +1,4 @@
+![Banner](images/banner.png?raw=true "Banner")
 # 3D Particle System Editor
 
 ## Description
