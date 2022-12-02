@@ -25,6 +25,24 @@ if (CLIENT) then
 end
 
 --!
+--! @brief      Determines ability to transmit data from the worker to the particle system.
+--!
+--! @return     True if able to transmit, False otherwise.
+--!
+function TOOL:CanTransmit()
+
+	local worker = self:GetWeapon();
+	local workerValid = worker != NULL && worker != nil && worker:IsValid();
+	if (!workerValid) then return false; end
+
+	local system = worker:GetNWEntity("System");
+	local systemValid = system != NULL && system != nil && system:IsValid();
+	if (!systemValid) then return false; end
+
+	return true;
+end
+
+--!
 --! @brief      Sets the particle system's position in the world. Will also align
 --! 			the system's angles to match the surface it is on.
 --!
@@ -70,7 +88,7 @@ end
 --!
 function TOOL:LeftClick(trace)
 
-	if (!SERVER) then return; end
+	if (!SERVER || !self:CanTransmit()) then return; end
 
 	-- Weapon acts as the worker for data transfer between the system and the editor.
 	-- This could be any entity but since we are using a tool, it makes sense to use
@@ -93,7 +111,7 @@ end
 --!
 function TOOL:RightClick(trace)
 
-	if (!SERVER) then return; end
+	if (!SERVER || !self:CanTransmit()) then return; end
 
 	-- Delegate positioning and parenting to appropriate method.
 	if (!trace.HitWorld && trace.Entity != NULL) then self:UpdateParticleSystemParent(trace.Entity);
@@ -111,7 +129,7 @@ end
 --!
 function TOOL:Reload()
 
-	if (!SERVER) then return; end
+	if (!SERVER || !self:CanTransmit()) then return; end
 
 	-- Begin network call to particle system.
 	self:UpdateParticleSystemParent(self:GetOwner());
@@ -127,13 +145,12 @@ end
 function TOOL:Think()
 
 	local worker = self:GetWeapon();
-	local system = worker:GetNWEntity("System");
 	local workerValid = worker != NULL && worker != nil && worker:IsValid();
-	local systemValid = system != NULL && system != nil && system:IsValid();
+	if (!workerValid) then return; end
 
 	-- Initialize control panel once the weapon entity is valid since we will be using it client side
 	-- for networking the editor data to the particle system.
-	if (CLIENT && !self.PanelInitialized && workerValid) then
+	if (CLIENT && !self.PanelInitialized) then
 
 		local panel = controlpanel.Get("3d_particle_system_editor");
 		panel:ClearControls();
@@ -141,6 +158,9 @@ function TOOL:Think()
 		self.BuildCPanel(panel, worker);
 		self.PanelInitialized = true;
 	end
+
+	local system = worker:GetNWEntity("System");
+	local systemValid = system != NULL && system != nil && system:IsValid();
 
 	-- Particle system emitter not initialized yet, create it and keep a reference for networking.
 	if (SERVER && !systemValid) then
@@ -154,7 +174,7 @@ function TOOL:Think()
 	end
 
 	-- Auto save feature.
-	if (workerValid && systemValid && CurTime() > (self.LastAutoSave || 0)) then
+	if (systemValid && CurTime() > (self.LastAutoSave || 0)) then
 		GLOBALS_3D_PARTICLE_EDITOR:Save(worker, "autosave", "data/3d_particle_system_editor", true);
 		self.LastAutoSave = CurTime() + 30;
 	end
