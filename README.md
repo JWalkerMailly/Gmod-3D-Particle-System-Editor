@@ -2,7 +2,8 @@
 
 ## Description
 GUI tool to easily create 3D Particle Effects using the 3D Particle System Base. The tool will be found in the 'Effects' category of the spawn menu. Workshop:
-https://steamcommunity.com/sharedfiles/filedetails/?id=2895831461
+
+[Workshop Link](https://steamcommunity.com/sharedfiles/filedetails/?id=2895831461)
 
 ## How to use
 If you are familiar with Source's PCFs, you'll be comfortable with this tool. If not, here is the data structure behind it. Particles are contained inside a particle system. A particle system is also considered an emitter in some engines. It is strongly recommended to type the following command in the console to see where your particle system is located in the world.
