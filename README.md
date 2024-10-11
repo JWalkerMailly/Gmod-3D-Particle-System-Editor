@@ -30,7 +30,8 @@ garrysmod/garrysmod/data/3d_particle_system_editor
 ```
 You can save your particle files wherever you like as long as the folder already exists inside the 'data' directory.
 
-**IMPORTANT:** Due to limitations with the file library, the tool will save your particle system as; your_system.lua.txt. To use your particle system, you **must** remove the *.txt* extension.
+> [!IMPORTANT]  
+> Due to limitations with the file library, the tool will save your particle system as; your_system.lua.txt. To use your particle system, you **must** remove the *.txt* extension.
 
 ### Particles
 To add particles to your system, simply press 'Add Particle' and a new category will be appended to the end of your menu. From there you'll be able to modify all the parameters of that particle. Here is a comprehensive list of all the properties:
@@ -121,7 +122,9 @@ It is important to understand the data structure behind the properties in the ed
 
 ## Using your particles
 Once you have created your particle system, you will be left with a *.lua.txt* file. This file represents the configuration of your particle system to be reused in your addons/gamemodes/etc.
-**IMPORTANT:** Due to limitations with the file library, the tool will save your particle system as; your_system.lua.txt. To use your particle system, you **must** remove the *.txt* extension.
+
+> [!IMPORTANT]
+> Due to limitations with the file library, the tool will save your particle system as; your_system.lua.txt. To use your particle system, you **must** remove the *.txt* extension.
 
 ### ![Shared](images/shared.png?raw=true "Shared")  Caching your particle system
 The .lua file acts like a PCF, to add it to the cache, you must call:
@@ -156,5 +159,5 @@ ParticleSystem3D("your_system", Vector(0, 0, 0), Angle(0, 0, 0), 2.5);
 
 This would spawn the particle system at the map's origin for 2.5 seconds.
 
-## Disclaimer
-The editor's lifetime is also dependent on your tool's lifetime, so **if you die while creating a particle system, you risk losing your work** if you have not saved. If this were to happen, do not spawn the tool as it will reset your editor, simply navigate to the panel and 'Print' the configuration to your console. There is also an auto-save feature that saves your work every 30 seconds. This tool **may not be compatible with servers**, it was mainly designed for singleplayer use. The particle systems created with this tool **are compatible with servers**.
+> [!WARNING] 
+> The editor's lifetime is also dependent on your tool's lifetime, so **if you die while creating a particle system, you risk losing your work** if you have not saved. If this were to happen, do not spawn the tool as it will reset your editor, simply navigate to the panel and 'Print' the configuration to your console. There is also an auto-save feature that saves your work every 30 seconds. This tool **may not be compatible with servers**, it was mainly designed for singleplayer use. The particle systems created with this tool **are compatible with servers**.
